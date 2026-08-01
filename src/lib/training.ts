@@ -14,9 +14,13 @@ export function createTrainingQuestion(
   threads: InterviewThread[],
   previousPrompt?: string,
 ): TrainingQuestion {
-  const candidates = threads.flatMap((thread) =>
-    thread.examples.map((prompt) => ({ prompt, thread })),
-  )
+  const candidates = threads.flatMap((thread) => {
+    const prompts = [
+      ...thread.examples,
+      ...(thread.variants?.flatMap((variant) => variant.examples) ?? []),
+    ]
+    return prompts.map((prompt) => ({ prompt, thread }))
+  })
   const filtered = candidates.filter((candidate) => candidate.prompt !== previousPrompt)
   const pool = filtered.length > 0 ? filtered : candidates
   const selected = pool[Math.floor(Math.random() * pool.length)]
