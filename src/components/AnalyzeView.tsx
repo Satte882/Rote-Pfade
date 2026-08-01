@@ -64,52 +64,53 @@ export function AnalyzeView({ onFeedbackSaved }: { onFeedbackSaved: () => void }
 
   return (
     <section className="sidecar-view" aria-label="Roten Faden erkennen">
-      <label className="compact-input-label" htmlFor="question">Frage eingeben · Enter</label>
-      <textarea
-        ref={inputRef}
-        id="question"
-        value={question}
-        autoFocus
-        rows={1}
-        spellCheck
-        onChange={(event) => {
-          setQuestion(event.target.value)
-          resizeInput(event.target)
-        }}
-        onKeyDown={(event) => {
-          if (event.key === 'Escape') {
-            event.preventDefault()
-            clear()
-            return
-          }
-          if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault()
-            analyze()
-          }
-        }}
-      />
-
-      {error && <p className="error-message" role="alert">{error}</p>}
+      <div className="input-zone">
+        <label className="compact-input-label" htmlFor="question">Frage eingeben · Enter</label>
+        <textarea
+          ref={inputRef}
+          id="question"
+          value={question}
+          autoFocus
+          rows={1}
+          spellCheck
+          onChange={(event) => {
+            setQuestion(event.target.value)
+            resizeInput(event.target)
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') {
+              event.preventDefault()
+              clear()
+              return
+            }
+            if (event.key === 'Enter' && !event.shiftKey) {
+              event.preventDefault()
+              analyze()
+            }
+          }}
+        />
+        {error && <p className="error-message" role="alert">{error}</p>}
+      </div>
 
       {result && (
         <section className="compact-result" aria-live="polite">
           <h1>{result.primary.thread.name}</h1>
-          <div className="arrow-path">
-            {result.primary.thread.steps.map((step) => (
-              <div className="arrow-step" key={step}>
-                <span aria-hidden="true">→</span>
+          <ol className="numbered-path">
+            {result.primary.thread.steps.map((step, index) => (
+              <li className="numbered-step" key={step}>
+                <span aria-hidden="true">{index + 1}</span>
                 <strong>{step}</strong>
-              </div>
+              </li>
             ))}
-          </div>
+          </ol>
 
           <details className="compact-details">
             <summary>Alternative / Zuordnung</summary>
-            <div className="alternative-lines">
+            <ol className="alternative-lines">
               {result.alternatives.map((alternative) => (
-                <span key={alternative.thread.id}>→ {alternative.thread.shortName}</span>
+                <li key={alternative.thread.id}>{alternative.thread.shortName}</li>
               ))}
-            </div>
+            </ol>
             <label htmlFor="correction">Zuordnung korrigieren</label>
             <select
               id="correction"
