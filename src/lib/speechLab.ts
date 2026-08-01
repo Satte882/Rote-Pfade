@@ -152,7 +152,7 @@ async function resampleTo16k(mono: Float32Array, inputSampleRate: number): Promi
   const length = Math.max(1, Math.ceil(mono.length * SPEECH_LAB_SAMPLE_RATE / inputSampleRate))
   const offline = new OfflineAudioContext(1, length, SPEECH_LAB_SAMPLE_RATE)
   const sourceBuffer = offline.createBuffer(1, mono.length, inputSampleRate)
-  sourceBuffer.copyToChannel(mono, 0)
+  sourceBuffer.copyToChannel(new Float32Array(mono), 0)
   const source = offline.createBufferSource()
   source.buffer = sourceBuffer
   source.connect(offline.destination)
