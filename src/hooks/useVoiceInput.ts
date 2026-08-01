@@ -151,6 +151,8 @@ export function useVoiceInput(onTranscript: (text: string) => void): VoiceInputS
   const [preferredProfile, setPreferredProfileState] = useState<PreferredProfile>(loadPreferredProfile)
 
   const phaseRef = useRef<SpeechPhase>('idle')
+  const diagnosticsRef = useRef<SpeechDiagnostics>(diagnostics)
+  diagnosticsRef.current = diagnostics
   const workerRef = useRef<Worker | null>(null)
   const recorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -186,11 +188,12 @@ export function useVoiceInput(onTranscript: (text: string) => void): VoiceInputS
 
     try {
       const modelWasPreparedBefore = Boolean(localStorage.getItem(MODEL_READY_MARKER_KEY))
+      let misses = readNumber(CACHE_MISS_COUNT_KEY)
       if (!afterModelLoad && modelWasPreparedBefore && cacheEntries === 0) {
-        const misses = readNumber(CACHE_MISS_COUNT_KEY) + 1
+        misses += 1
         localStorage.setItem(CACHE_MISS_COUNT_KEY, String(misses))
-        if (misses >= 2) cacheState = 'unreliable'
       }
+      if (misses >= 2) cacheState = 'unreliable'
       if (afterModelLoad && cacheEntries && cacheEntries > 0) {
         localStorage.setItem(MODEL_READY_MARKER_KEY, new Date().toISOString())
       }
@@ -278,7 +281,7 @@ export function useVoiceInput(onTranscript: (text: string) => void): VoiceInputS
         setCurrentPhase('idle')
 
         let performanceRecommendation: SpeechDiagnostics['performanceRecommendation'] = null
-        const currentQuality = diagnostics.audioQuality
+        const currentQuality = diagnosticsRef.current.audioQuality
         if (
           message.profile === 'quality-fp16-q8'
           && message.modelWaitMs < 500
@@ -457,6 +460,7 @@ export function useVoiceInput(onTranscript: (text: string) => void): VoiceInputS
       if (audio.length < 1_600) throw new Error('Die Aufnahme ist zu kurz oder enthält keine erkennbare Sprache.')
 
       const audioQuality = assessAudioQuality(audio)
+      diagnosticsRef.current = { ...diagnosticsRef.current, audioQuality }
       setDiagnostics((current) => ({ ...current, audioQuality }))
       setCurrentPhase('loading-model')
       setStatus('Transkription wird gestartet.')
