@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useVoiceInput } from '../hooks/useVoiceInput'
 import { classifyQuestion, getResolvedName, getResolvedSteps, threads } from '../lib/classifier'
 import { saveFeedback } from '../lib/storage'
 import type { ClassificationResult, FeedbackEntry } from '../types/thread'
@@ -23,6 +24,19 @@ function evidenceLabel(result: ClassificationResult): string {
   return 'Alternative / Zuordnung'
 }
 
+function MicrophoneIcon({ recording }: { recording: boolean }) {
+  if (recording) {
+    return <span className="stop-symbol" aria-hidden="true" />
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 14.5a4 4 0 0 0 4-4v-4a4 4 0 1 0-8 0v4a4 4 0 0 0 4 4Z" />
+      <path d="M5.5 10.5a6.5 6.5 0 0 0 13 0M12 17v4M8.5 21h7" />
+    </svg>
+  )
+}
+
 export function AnalyzeView({ onFeedbackSaved }: { onFeedbackSaved: () => void }) {
   const [question, setQuestion] = useState('')
   const [result, setResult] = useState<ClassificationResult | null>(null)
@@ -38,9 +52,9 @@ export function AnalyzeView({ onFeedbackSaved }: { onFeedbackSaved: () => void }
 
   const focusInput = () => requestAnimationFrame(() => inputRef.current?.focus())
 
-  const analyze = () => {
+  const analyzeText = (value: string) => {
     try {
-      const next = classifyQuestion(question)
+      const next = classifyQuestion(value)
       setResult(next)
       setError('')
       setCorrectionId('')
@@ -51,6 +65,14 @@ export function AnalyzeView({ onFeedbackSaved }: { onFeedbackSaved: () => void }
       focusInput()
     }
   }
+
+  const voice = useVoiceInput((transcript) => {
+    setQuestion(transcript)
+    requestAnimationFrame(() => {
+      if (inputRef.current) resizeInput(inputRef.current)
+    })
+    analyzeText(transcript)
+  })
 
   const clear = () => {
     setQuestion('')
@@ -85,33 +107,78 @@ export function AnalyzeView({ onFeedbackSaved }: { onFeedbackSaved: () => void }
     focusInput()
   }
 
+  const recording = voice.phase === 'recording'
+  const processing = [
+    'requesting-permission',
+    'preparing-audio',
+    'loading-model',
+    'transcribing',
+    'discarded',
+  ].includes(voice.phase)
+
+  const handleMicrophone = () => {
+    if (recording) {
+      void voice.stopAndTranscribe()
+      focusInput()
+      return
+    }
+    if (!processing) {
+      void voice.startRecording().then(focusInput)
+    }
+  }
+
   return (
     <section className="sidecar-view" aria-label="Roten Faden erkennen">
       <div className="input-zone">
-        <label className="compact-input-label" htmlFor="question">Frage eingeben · Enter</label>
-        <textarea
-          ref={inputRef}
-          id="question"
-          value={question}
-          autoFocus
-          rows={1}
-          spellCheck
-          onChange={(event) => {
-            setQuestion(event.target.value)
-            resizeInput(event.target)
-          }}
-          onKeyDown={(event) => {
-            if (event.key === 'Escape') {
-              event.preventDefault()
-              clear()
-              return
-            }
-            if (event.key === 'Enter' && !event.shiftKey) {
-              event.preventDefault()
-              analyze()
-            }
-          }}
-        />
+        <label className="compact-input-label" htmlFor="question">
+          {recording ? 'Aufnahme läuft · Enter beendet' : 'Frage eingeben · Enter'}
+        </label>
+        <div className="voice-input-row">
+          <button
+            className={recording ? 'microphone-button recording' : 'microphone-button'}
+            type="button"
+            onClick={handleMicrophone}
+            disabled={!voice.supported || (processing && !recording)}
+            aria-label={recording ? 'Aufnahme beenden und transkribieren' : 'Sprachaufnahme starten'}
+            title={voice.supported ? 'Frage sprechen' : 'Sprachaufnahme wird von diesem Browser nicht unterstützt'}
+          >
+            <MicrophoneIcon recording={recording} />
+          </button>
+          <textarea
+            ref={inputRef}
+            id="question"
+            value={question}
+            autoFocus
+            rows={1}
+            spellCheck
+            onChange={(event) => {
+              setQuestion(event.target.value)
+              resizeInput(event.target)
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') {
+                event.preventDefault()
+                if (recording || processing) voice.discard()
+                else clear()
+                return
+              }
+              if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault()
+                if (recording) {
+                  void voice.stopAndTranscribe()
+                  return
+                }
+                if (!processing) analyzeText(question)
+              }
+            }}
+          />
+        </div>
+        {(voice.status || voice.error) && (
+          <div className={voice.error ? 'speech-status error' : `speech-status phase-${voice.phase}`} role="status">
+            <span aria-hidden="true" />
+            <strong>{voice.error || voice.status}</strong>
+          </div>
+        )}
         {error && <p className="error-message" role="alert">{error}</p>}
       </div>
 
