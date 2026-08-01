@@ -1,10 +1,20 @@
-import type { ClassificationResult, InterviewThread, RankedThread } from '../types/thread'
+import type {
+  ClassificationEvidence,
+  ClassificationResult,
+  Cue,
+  FeedbackEntry,
+  InterviewThread,
+  RankedThread,
+  ThreadVariant,
+} from '../types/thread'
+import { loadFeedback } from './storage'
 import { extractTopic, jaccardSimilarity, normalizeText, tokenize } from './text'
 
 const threadModules = import.meta.glob('../data/threads/*.json', { eager: true, import: 'default' })
 
 const THREAD_ORDER = [
   'vorgehen',
+  'strategie-zielbild',
   'problem-stoerung',
   'entscheidung',
   'entscheidung-unsicherheit',
@@ -23,57 +33,132 @@ export const threads = (Object.values(threadModules) as InterviewThread[]).sort(
   (left, right) => THREAD_ORDER.indexOf(left.id) - THREAD_ORDER.indexOf(right.id),
 )
 
-const tokenOverlapScore = (input: string, thread: InterviewThread): number => {
-  const inputTokens = new Set(tokenize(input))
-  const referenceTokens = new Set(
-    tokenize(`${thread.name} ${thread.description} ${thread.purpose} ${thread.steps.join(' ')}`),
-  )
+type CueScore = {
+  score: number
+  matches: string[]
+}
 
-  let matches = 0
-  inputTokens.forEach((token) => {
-    if (referenceTokens.has(token)) matches += 1
+type VariantScore = {
+  variant: ThreadVariant
+  score: number
+  matches: string[]
+  exampleSimilarity: number
+}
+
+type ClassifyOptions = {
+  feedback?: FeedbackEntry[]
+}
+
+function tokenCoverage(input: string, reference: string): number {
+  const inputTokens = new Set(tokenize(input))
+  const referenceTokens = [...new Set(tokenize(reference))]
+  if (inputTokens.size === 0 || referenceTokens.length === 0) return 0
+  const matches = referenceTokens.filter((token) => inputTokens.has(token)).length
+  return matches / referenceTokens.length
+}
+
+function inputCoverage(input: string, reference: string): number {
+  const inputTokens = [...new Set(tokenize(input))]
+  const referenceTokens = new Set(tokenize(reference))
+  if (inputTokens.length === 0 || referenceTokens.size === 0) return 0
+  const matches = inputTokens.filter((token) => referenceTokens.has(token)).length
+  return matches / inputTokens.length
+}
+
+function scoreCues(input: string, cues: Cue[]): CueScore {
+  const normalizedInput = normalizeText(input)
+  const matches: string[] = []
+  let score = 0
+
+  cues.forEach((cue) => {
+    const normalizedCue = normalizeText(cue.text)
+    let factor = 0
+
+    if (normalizedInput.includes(normalizedCue)) {
+      factor = 1
+    } else {
+      const cueTokens = tokenize(cue.text)
+      const coverage = tokenCoverage(input, cue.text)
+      const similarity = jaccardSimilarity(input, cue.text)
+
+      if (cueTokens.length >= 2 && coverage >= 0.75) factor = Math.max(factor, coverage * 0.78)
+      if (cueTokens.length === 1 && coverage === 1) factor = Math.max(factor, 0.58)
+      if (similarity >= 0.5) factor = Math.max(factor, similarity * 0.68)
+    }
+
+    if (factor > 0) {
+      score += cue.weight * factor
+      matches.push(cue.text)
+    }
   })
 
-  return matches * 0.45
+  return { score, matches }
+}
+
+function scoreAntiCues(input: string, cues: Cue[]): number {
+  return scoreCues(input, cues).score
+}
+
+function exampleScore(input: string, examples: string[]): { score: number; similarity: number } {
+  const similarities = examples.map((example) => {
+    const jaccard = jaccardSimilarity(input, example)
+    const shortInputCoverage = inputCoverage(input, example)
+    return Math.max(jaccard, shortInputCoverage * 0.78)
+  })
+  const similarity = Math.max(...similarities, 0)
+  return { score: similarity * 7, similarity }
+}
+
+function referenceTokenScore(input: string, reference: string): number {
+  const coverage = inputCoverage(input, reference)
+  const inputTokenCount = new Set(tokenize(input)).size
+  const cap = inputTokenCount <= 4 ? 1.8 : 1.2
+  return Math.min(cap, coverage * cap)
+}
+
+function rankVariant(input: string, variant: ThreadVariant): VariantScore {
+  const positive = scoreCues(input, variant.cues)
+  const negative = scoreAntiCues(input, variant.antiCues)
+  const examples = exampleScore(input, variant.examples)
+  const reference = `${variant.name} ${variant.description} ${variant.steps.join(' ')}`
+  const score = Math.max(0, positive.score - negative + examples.score + referenceTokenScore(input, reference))
+
+  return {
+    variant,
+    score,
+    matches: positive.matches,
+    exampleSimilarity: examples.similarity,
+  }
+}
+
+function selectVariant(input: string, thread: InterviewThread): VariantScore | undefined {
+  if (!thread.variants?.length) return undefined
+  const ranked = thread.variants
+    .map((variant) => rankVariant(input, variant))
+    .sort((left, right) => right.score - left.score)
+  const best = ranked[0]
+  if (!best || best.score < 2.2) return undefined
+  return best
 }
 
 function rankThread(input: string, thread: InterviewThread): Omit<RankedThread, 'matchPercent'> {
-  const normalizedInput = normalizeText(input)
-  const matchedCues: string[] = []
-  let rawScore = 0
-
-  thread.cues.forEach((cue) => {
-    const normalizedCue = normalizeText(cue.text)
-    if (normalizedInput.includes(normalizedCue)) {
-      rawScore += cue.weight
-      matchedCues.push(cue.text)
-      return
-    }
-
-    const similarity = jaccardSimilarity(normalizedInput, normalizedCue)
-    if (similarity >= 0.66) {
-      rawScore += cue.weight * similarity * 0.7
-      matchedCues.push(cue.text)
-    }
-  })
-
-  thread.antiCues.forEach((cue) => {
-    const normalizedCue = normalizeText(cue.text)
-    if (normalizedInput.includes(normalizedCue)) rawScore -= cue.weight
-  })
-
-  const exampleSimilarity = Math.max(
-    ...thread.examples.map((example) => jaccardSimilarity(input, example)),
+  const positive = scoreCues(input, thread.cues)
+  const negative = scoreAntiCues(input, thread.antiCues)
+  const examples = exampleScore(input, thread.examples)
+  const reference = `${thread.name} ${thread.description} ${thread.purpose} ${thread.steps.join(' ')}`
+  const selectedVariant = selectVariant(input, thread)
+  const variantContribution = selectedVariant ? Math.min(4, selectedVariant.score * 0.38) : 0
+  const rawScore = Math.max(
     0,
+    positive.score - negative + examples.score + referenceTokenScore(input, reference) + variantContribution,
   )
-  rawScore += exampleSimilarity * 8
-  rawScore += tokenOverlapScore(input, thread)
 
   return {
     thread,
-    rawScore: Math.max(rawScore, 0),
-    matchedCues: [...new Set(matchedCues)].slice(0, 4),
-    exampleSimilarity,
+    selectedVariant: selectedVariant?.variant,
+    rawScore,
+    matchedCues: [...new Set([...positive.matches, ...(selectedVariant?.matches ?? [])])].slice(0, 6),
+    exampleSimilarity: Math.max(examples.similarity, selectedVariant?.exampleSimilarity ?? 0),
   }
 }
 
@@ -85,7 +170,47 @@ function toMatchPercent(score: number, topScore: number, totalTopScores: number)
   return Math.max(12, Math.min(96, Math.round(percent)))
 }
 
-export function classifyQuestion(input: string): ClassificationResult {
+function normalizedKey(value: string): string {
+  return normalizeText(value)
+}
+
+function findOverride(input: string, feedback: FeedbackEntry[]): FeedbackEntry | undefined {
+  const key = normalizedKey(input)
+  return feedback.find((entry) => normalizedKey(entry.question) === key)
+}
+
+function determineEvidence(ranked: RankedThread[], fallback: boolean, overrideApplied: boolean): ClassificationEvidence {
+  if (overrideApplied) return 'clear'
+  const first = ranked[0]
+  const second = ranked[1]
+  if (fallback || !first || first.rawScore < 2.2) return 'weak'
+  if (second && second.rawScore > 0) {
+    const delta = first.rawScore - second.rawScore
+    if (delta <= Math.max(1.35, first.rawScore * 0.18)) return 'ambiguous'
+  }
+  return 'clear'
+}
+
+function applyOverride(
+  ranked: Array<Omit<RankedThread, 'matchPercent'>>,
+  override: FeedbackEntry | undefined,
+): boolean {
+  if (!override) return false
+  const index = ranked.findIndex((item) => item.thread.id === override.selectedThreadId)
+  if (index < 0) return false
+
+  const [selected] = ranked.splice(index, 1)
+  const selectedVariant = override.selectedVariantId
+    ? selected.thread.variants?.find((variant) => variant.id === override.selectedVariantId)
+    : undefined
+  selected.selectedVariant = selectedVariant
+  selected.rawScore = Math.max(12, (ranked[0]?.rawScore ?? 0) + 6)
+  selected.matchedCues = ['lokal bestätigte Zuordnung']
+  ranked.unshift(selected)
+  return true
+}
+
+export function classifyQuestion(input: string, options: ClassifyOptions = {}): ClassificationResult {
   const trimmed = input.trim()
   if (!trimmed) throw new Error('Bitte gib eine Interviewfrage oder ein Satzfragment ein.')
 
@@ -93,7 +218,10 @@ export function classifyQuestion(input: string): ClassificationResult {
     .map((thread) => rankThread(trimmed, thread))
     .sort((left, right) => right.rawScore - left.rawScore)
 
+  const feedback = options.feedback ?? loadFeedback()
+  const overrideApplied = applyOverride(rankedBase, findOverride(trimmed, feedback))
   const fallback = rankedBase[0]?.rawScore === 0
+
   if (fallback) {
     const defaultIndex = rankedBase.findIndex((item) => item.thread.id === 'vorgehen')
     if (defaultIndex > 0) {
@@ -106,9 +234,11 @@ export function classifyQuestion(input: string): ClassificationResult {
   const totalTopScores = rankedBase.slice(0, 3).reduce((sum, item) => sum + item.rawScore, 0)
   const ranked: RankedThread[] = rankedBase.map((item, index) => ({
     ...item,
-    matchPercent: fallback && index === 0
-      ? 28
-      : toMatchPercent(item.rawScore, topScore, totalTopScores),
+    matchPercent: overrideApplied && index === 0
+      ? 100
+      : fallback && index === 0
+        ? 28
+        : toMatchPercent(item.rawScore, topScore, totalTopScores),
   }))
 
   return {
@@ -116,9 +246,21 @@ export function classifyQuestion(input: string): ClassificationResult {
     topic: extractTopic(trimmed),
     primary: ranked[0],
     alternatives: ranked.slice(1, 3),
+    evidence: determineEvidence(ranked, fallback, overrideApplied),
+    overrideApplied,
   }
 }
 
 export function getThreadById(id: string): InterviewThread | undefined {
   return threads.find((thread) => thread.id === id)
+}
+
+export function getResolvedSteps(result: RankedThread): string[] {
+  return result.selectedVariant?.steps ?? result.thread.steps
+}
+
+export function getResolvedName(result: RankedThread): string {
+  return result.selectedVariant
+    ? `${result.thread.name} · ${result.selectedVariant.name}`
+    : result.thread.name
 }
