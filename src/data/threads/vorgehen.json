@@ -4,36 +4,40 @@
   "shortName": "Vorgehen",
   "category": "Vorgehen",
   "purpose": "Ein strukturiertes, nachvollziehbares Vorgehen vom Auftrag bis zum nächsten Schritt zeigen.",
-  "description": "Passt, wenn nach deinem generellen Vorgehen, einem Projektstart oder dem Weg von der Idee zur Umsetzung gefragt wird.",
+  "description": "Passt, wenn nach deinem generellen Vorgehen, einem Projektstart, einer Analyse oder dem Weg von der Idee zur Umsetzung gefragt wird.",
   "steps": [
     "Ziel und Auftrag klären",
     "Ausgangslage und Rahmenbedingungen analysieren",
-    "Vorgehen und Optionen entwickeln",
+    "Passende Arbeitslogik festlegen",
     "Ergebnis oder Empfehlung ableiten",
     "Nächsten Umsetzungsschritt festlegen"
   ],
   "stepPrompts": [
     "Welches Ziel und welcher Auftrag gelten für {topic}?",
     "Welche Ausgangslage, Stakeholder und Rahmenbedingungen prägen {topic}?",
-    "Welche Arbeitsschritte und Lösungsoptionen sind sinnvoll?",
+    "Welche Analysen, Arbeitsschritte oder Lösungsoptionen sind sinnvoll?",
     "Welches Ergebnis oder welche Empfehlung entsteht daraus?",
     "Was passiert nach der Entscheidung konkret?"
   ],
-  "mnemonic": "Verstehen – analysieren – gestalten – entscheiden – umsetzen",
+  "mnemonic": "Verstehen – analysieren – bearbeiten – entscheiden – umsetzen",
   "cues": [
     { "text": "wie würden sie vorgehen", "weight": 5 },
     { "text": "wie gehen sie vor", "weight": 5 },
     { "text": "wie starten sie", "weight": 4 },
     { "text": "vorgehensweise", "weight": 4 },
     { "text": "von der idee zur umsetzung", "weight": 5 },
-    { "text": "prozessanalyse durchführen", "weight": 4 },
-    { "text": "projekt starten", "weight": 3 },
+    { "text": "prozessanalyse durchführen", "weight": 6 },
+    { "text": "prozess analysieren", "weight": 6 },
+    { "text": "projekt starten", "weight": 5 },
+    { "text": "projekt aufsetzen", "weight": 5 },
     { "text": "erster schritt", "weight": 2 }
   ],
   "antiCues": [
     { "text": "warum funktioniert", "weight": 3 },
     { "text": "unterschied zwischen", "weight": 4 },
-    { "text": "erzählen sie von", "weight": 4 }
+    { "text": "erzählen sie von", "weight": 4 },
+    { "text": "strategie entwickeln", "weight": 4 },
+    { "text": "zielbild", "weight": 4 }
   ],
   "examples": [
     "Wie gehen Sie vor, wenn ein Fachbereich erstmals einen KI-Anwendungsfall einbringen möchte?",
@@ -41,6 +45,115 @@
     "Wie kommen Sie von einer groben Prozessidee zu einer umsetzbaren Lösung?",
     "Wie führen Sie eine strukturierte Prozessanalyse durch?"
   ],
-  "opening": "Zuerst kläre ich Ziel, Auftrag und Entscheidungsspielraum für {topic}. Danach analysiere ich die Ausgangslage und strukturiere das weitere Vorgehen.",
-  "relatedIds": ["ki-eignung", "entscheidung", "priorisierung"]
+  "opening": "Zuerst kläre ich Ziel, Auftrag und Entscheidungsspielraum für {topic}. Danach analysiere ich die Ausgangslage und wähle die passende Arbeitslogik.",
+  "relatedIds": ["strategie-zielbild", "ki-eignung", "entscheidung", "priorisierung"],
+  "variants": [
+    {
+      "id": "prozessanalyse",
+      "name": "Strukturierte Prozessanalyse",
+      "description": "Passt bei Ist-Aufnahme, Ursachenanalyse, Soll-Ist-Abgleich und Prozessverbesserung.",
+      "steps": [
+        "Ziel, Scope und Prozessgrenzen festlegen",
+        "Ist-Prozess und relevante Daten aufnehmen",
+        "Schwachstellen, Ursachen und Muster analysieren",
+        "Soll-Zustand und Handlungsfelder ableiten",
+        "Maßnahmen priorisieren und Umsetzung festlegen"
+      ],
+      "stepPrompts": [
+        "Welcher Prozessabschnitt und welches Analyseziel gelten?",
+        "Welche Prozessschritte, Rollen, Systeme, Daten und Kennzahlen bilden den Ist-Zustand?",
+        "Wo entstehen Wartezeiten, Fehler, Medienbrüche oder unnötige Arbeit und warum?",
+        "Wie sieht der belastbare Soll-Zustand aus?",
+        "Welche Maßnahmen haben den höchsten Nutzen und wie werden sie umgesetzt?"
+      ],
+      "cues": [
+        { "text": "prozessanalyse", "weight": 9 },
+        { "text": "prozess analysieren", "weight": 9 },
+        { "text": "ist prozess", "weight": 7 },
+        { "text": "soll ist abgleich", "weight": 8 },
+        { "text": "schwachstellen im prozess", "weight": 8 },
+        { "text": "prozessaufnahme", "weight": 7 },
+        { "text": "value stream analysieren", "weight": 7 }
+      ],
+      "antiCues": [],
+      "examples": [
+        "Wie führen Sie eine strukturierte Prozessanalyse durch?",
+        "Wie untersuchen Sie den Ist-Prozess und leiten Verbesserungen ab?",
+        "Prozessanalyse vom Scope bis zur Maßnahmenpriorisierung"
+      ],
+      "mnemonic": "Scope → Ist → Ursachen → Soll → Maßnahmen",
+      "opening": "Bei einer Prozessanalyse grenze ich zuerst Prozess, Ziel und Betrachtungsebene ab, bevor ich den Ist-Zustand mit Daten und Beteiligten aufnehme."
+    },
+    {
+      "id": "projektstart",
+      "name": "Projekt- oder Initiativenstart",
+      "description": "Passt beim Aufsetzen eines neuen Projekts oder einer bereichsübergreifenden Initiative.",
+      "steps": [
+        "Ziel, Auftrag und Sponsor klären",
+        "Scope, Stakeholder und Rahmenbedingungen bestimmen",
+        "Ergebnisse, Vorgehen und Entscheidungswege strukturieren",
+        "Rollen, Ressourcen und Risiken klären",
+        "Kick-off und ersten belastbaren Meilenstein festlegen"
+      ],
+      "stepPrompts": [
+        "Welches Ergebnis wird erwartet und wer trägt den Auftrag?",
+        "Was gehört in den Scope und welche Stakeholder sind betroffen?",
+        "Welche Phasen, Deliverables und Entscheidungen sind notwendig?",
+        "Wer übernimmt welche Rolle und welche Engpässe oder Risiken bestehen?",
+        "Was wird im Kick-off verbindlich gemacht und wann liegt die erste Evidenz vor?"
+      ],
+      "cues": [
+        { "text": "projekt starten", "weight": 9 },
+        { "text": "projekt aufsetzen", "weight": 9 },
+        { "text": "initiative starten", "weight": 8 },
+        { "text": "kick off", "weight": 7 },
+        { "text": "ersten 100 tage", "weight": 7 },
+        { "text": "projektbeginn", "weight": 7 }
+      ],
+      "antiCues": [
+        { "text": "strategie", "weight": 3 }
+      ],
+      "examples": [
+        "Wie starten Sie ein bereichsübergreifendes Digitalisierungsprojekt?",
+        "Wie setzen Sie eine neue KI-Initiative auf?",
+        "Was tun Sie in den ersten Wochen eines Transformationsprojekts?"
+      ],
+      "mnemonic": "Auftrag → Scope → Vorgehen → Organisation → Start",
+      "opening": "Beim Projektstart kläre ich zuerst Auftrag, Ziel und Sponsor, bevor ich Scope, Stakeholder, Vorgehen und Verantwortlichkeiten verbindlich strukturiere."
+    },
+    {
+      "id": "loesungsentwicklung",
+      "name": "Von der Idee zur umsetzbaren Lösung",
+      "description": "Passt, wenn eine grobe Idee schrittweise konkretisiert, bewertet und in eine Umsetzung überführt werden soll.",
+      "steps": [
+        "Problem und Zielbild konkretisieren",
+        "Anforderungen und Randbedingungen erfassen",
+        "Lösungsoptionen entwickeln",
+        "Optionen validieren und auswählen",
+        "Umsetzung in Schritte und Verantwortlichkeiten überführen"
+      ],
+      "stepPrompts": [
+        "Welches Problem und welches gewünschte Ergebnis stehen hinter der Idee?",
+        "Welche fachlichen, technischen und organisatorischen Anforderungen gelten?",
+        "Welche realistischen Lösungswege gibt es?",
+        "Wie werden Nutzen, Machbarkeit und Risiken früh geprüft?",
+        "Welche Umsetzungsschritte, Rollen und Entscheidungen folgen?"
+      ],
+      "cues": [
+        { "text": "von der idee zur umsetzung", "weight": 9 },
+        { "text": "idee konkretisieren", "weight": 8 },
+        { "text": "lösung entwickeln", "weight": 7 },
+        { "text": "umsetzbare lösung", "weight": 8 },
+        { "text": "von der anforderung zur lösung", "weight": 7 }
+      ],
+      "antiCues": [],
+      "examples": [
+        "Wie kommen Sie von einer groben Prozessidee zu einer umsetzbaren Lösung?",
+        "Wie konkretisieren Sie eine erste KI-Idee?",
+        "Von der Anforderung bis zur validierten Lösung"
+      ],
+      "mnemonic": "Problem → Anforderungen → Optionen → Validierung → Umsetzung",
+      "opening": "Ich übersetze die Idee zuerst in ein konkretes Problem und Zielbild und leite daraus Anforderungen, Optionen und einen frühen Validierungsschritt ab."
+    }
+  ]
 }
