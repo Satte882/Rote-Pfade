@@ -122,11 +122,12 @@ export function useVoiceInput(onTranscript: (text: string) => void): VoiceInputS
         return
       }
 
+      const discarded = discardedRequestIdRef.current === message.id
       activeRequestIdRef.current = null
       discardedRequestIdRef.current = null
       setProgress(null)
-      setPhase('error')
-      setError(message.message)
+      setPhase(discarded ? 'idle' : 'error')
+      setError(discarded ? '' : message.message)
       setStatus('')
     })
 
@@ -154,7 +155,7 @@ export function useVoiceInput(onTranscript: (text: string) => void): VoiceInputS
   const startRecording = async (): Promise<void> => {
     if (!supported || phase === 'recording' || activeRequestIdRef.current) return
 
-    operationVersionRef.current += 1
+    const operationVersion = ++operationVersionRef.current
     setError('')
     setProgress(null)
     setStatus('Mikrofonzugriff wird angefragt.')
@@ -170,6 +171,12 @@ export function useVoiceInput(onTranscript: (text: string) => void): VoiceInputS
           autoGainControl: true,
         },
       })
+
+      if (operationVersion !== operationVersionRef.current) {
+        stopStream(stream)
+        return
+      }
+
       const mimeType = preferredMimeType()
       const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined)
 
@@ -190,6 +197,7 @@ export function useVoiceInput(onTranscript: (text: string) => void): VoiceInputS
       setStatus('Aufnahme läuft · Enter beendet')
     } catch (recordingError) {
       cleanupRecorder()
+      if (operationVersion !== operationVersionRef.current) return
       setPhase('error')
       setStatus('')
       setError(
