@@ -1,4 +1,12 @@
+import type { AudioQuality } from '../types/speech'
+
 const WHISPER_SAMPLE_RATE = 16_000
+const FRAME_MS = 20
+
+function dbfs(value: number): number {
+  if (value <= 0) return -120
+  return 20 * Math.log10(value)
+}
 
 export function mixChannelsToMono(channels: readonly Float32Array[]): Float32Array {
   if (channels.length === 0) return new Float32Array()
@@ -62,6 +70,93 @@ export function resampleMono(
   }
 
   return output
+}
+
+export function assessAudioQuality(
+  audio: Float32Array,
+  sampleRate = WHISPER_SAMPLE_RATE,
+): AudioQuality {
+  const durationMs = audio.length / sampleRate * 1_000
+  if (audio.length === 0) {
+    return {
+      level: 'poor',
+      durationMs,
+      rmsDbfs: -120,
+      peakDbfs: -120,
+      clippingRatio: 0,
+      silenceRatio: 1,
+      benchmarkEligible: false,
+      warnings: ['Die Aufnahme enthält keine Audiodaten.'],
+    }
+  }
+
+  let sumSquares = 0
+  let peak = 0
+  let clippedSamples = 0
+  for (const sample of audio) {
+    const absolute = Math.abs(sample)
+    sumSquares += sample * sample
+    peak = Math.max(peak, absolute)
+    if (absolute >= 0.98) clippedSamples += 1
+  }
+
+  const rms = Math.sqrt(sumSquares / audio.length)
+  const clippingRatio = clippedSamples / audio.length
+  const frameLength = Math.max(1, Math.round(sampleRate * FRAME_MS / 1_000))
+  let silentFrames = 0
+  let frames = 0
+
+  for (let start = 0; start < audio.length; start += frameLength) {
+    const end = Math.min(audio.length, start + frameLength)
+    let frameSquares = 0
+    for (let index = start; index < end; index += 1) frameSquares += audio[index] * audio[index]
+    const frameRms = Math.sqrt(frameSquares / Math.max(1, end - start))
+    if (dbfs(frameRms) < -42) silentFrames += 1
+    frames += 1
+  }
+
+  const rmsDbfs = dbfs(rms)
+  const peakDbfs = dbfs(peak)
+  const silenceRatio = frames > 0 ? silentFrames / frames : 1
+  const warnings: string[] = []
+  let level: AudioQuality['level'] = 'good'
+
+  if (durationMs < 800) {
+    warnings.push('Die Aufnahme ist sehr kurz.')
+    level = 'poor'
+  }
+  if (rmsDbfs < -42) {
+    warnings.push('Die Aufnahme ist zu leise.')
+    level = 'poor'
+  } else if (rmsDbfs < -32 && level !== 'poor') {
+    warnings.push('Die Aufnahme ist eher leise.')
+    level = 'warning'
+  }
+  if (clippingRatio > 0.01) {
+    warnings.push('Die Aufnahme ist deutlich übersteuert.')
+    level = 'poor'
+  } else if (clippingRatio > 0.001 && level === 'good') {
+    warnings.push('Die Aufnahme enthält übersteuerte Spitzen.')
+    level = 'warning'
+  }
+  if (silenceRatio > 0.75) {
+    warnings.push('Die Aufnahme besteht überwiegend aus Stille.')
+    level = 'poor'
+  } else if (silenceRatio > 0.55 && level === 'good') {
+    warnings.push('Die Aufnahme enthält viel Stille.')
+    level = 'warning'
+  }
+
+  return {
+    level,
+    durationMs: Math.round(durationMs),
+    rmsDbfs: Math.round(rmsDbfs * 10) / 10,
+    peakDbfs: Math.round(peakDbfs * 10) / 10,
+    clippingRatio,
+    silenceRatio,
+    benchmarkEligible: level !== 'poor',
+    warnings,
+  }
 }
 
 export async function audioBlobToMono16k(blob: Blob): Promise<Float32Array> {

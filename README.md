@@ -37,19 +37,36 @@ Lokale Korrekturen sind deterministische Overrides für identische Eingaben. Es 
 Der kompakte Ablauf ist:
 
 1. Mikrofon anklicken.
-2. Interviewfrage sprechen.
-3. Enter drücken oder den Stopp-Button anklicken.
-4. Audio wird lokal auf Mono mit 16 kHz normalisiert.
-5. Whisper transkribiert im Web Worker.
-6. Das Transkript wird in das Eingabefeld eingesetzt und automatisch klassifiziert.
-7. Der Text bleibt editierbar und kann mit Enter erneut klassifiziert werden.
+2. Die Aufnahme startet sofort; parallel wird Whisper im Worker vorbereitet.
+3. Interviewfrage sprechen.
+4. Enter drücken oder den Stopp-Button anklicken.
+5. Die Aufnahme läuft noch 300 ms weiter, damit das Satzende nicht abgeschnitten wird.
+6. Audio wird lokal auf Mono mit 16 kHz normalisiert und auf Pegel, Stille sowie Übersteuerung geprüft.
+7. Whisper transkribiert im Web Worker.
+8. Das Transkript wird in das Eingabefeld eingesetzt und automatisch klassifiziert.
+9. Der Text bleibt editierbar und kann mit Enter erneut klassifiziert werden.
 
-Die Transkription nutzt `@huggingface/transformers`:
+Die Transkription nutzt `@huggingface/transformers` und folgende definierte Profilkette:
 
-- bevorzugt `onnx-community/whisper-base` mit WebGPU und q4-Gewichten,
-- als automatischen Fallback `onnx-community/whisper-tiny` mit WASM/CPU und q8-Gewichten.
+1. Standard: `onnx-community/whisper-base` über WebGPU mit FP16-Encoder und q8-Decoder.
+2. Technischer Fallback bei Initialisierungs- oder Inferenzfehlern: dasselbe Base-Modell mit q8/q8 über WebGPU.
+3. Letzter Fallback: `onnx-community/whisper-tiny` mit q8 über WASM/CPU.
 
-Die Verarbeitung von Audio und Transkript erfolgt im Browser. Beim ersten Einsatz werden die benötigten Modellartefakte und ONNX-Runtime-Dateien von Hugging Face beziehungsweise den von Transformers.js verwendeten Quellen geladen. Danach greift Transformers.js auf den Browsercache zurück. Die Anwendung fragt zusätzlich persistenten Browserspeicher an; der Browser kann diesen Wunsch ablehnen oder gespeicherte Daten später entfernen.
+Eine lediglich langsame FP16-Inferenz löst keinen stillen Qualitäts-Downgrade aus. Erst wenn mindestens zwei geeignete, bereits vorgewärmte Folgeaufnahmen sowohl mindestens 3,5 Sekunden Inferenzzeit als auch einen medianen Echtzeitfaktor von mindestens 1,25 erreichen, empfiehlt die App sichtbar einen Test mit q8/q8. Der Nutzer kann danach ebenso sichtbar zu FP16/q8 zurückkehren.
+
+Die Verarbeitung von Audio und Transkript erfolgt im Browser. Beim ersten Einsatz werden die benötigten Modellartefakte und ONNX-Runtime-Dateien von Hugging Face beziehungsweise den von Transformers.js verwendeten Quellen geladen. Danach verwendet Transformers.js den Cache-API-Speicher `transformers-cache`. Die Anwendung fragt zusätzlich persistenten Browserspeicher an; der Browser kann diesen Wunsch ablehnen oder gespeicherte Daten später entfernen.
+
+Die Sprachdiagnose zeigt unter anderem:
+
+- aktives Modellprofil und Backend,
+- Gesamtzeit nach Enter,
+- Audioaufbereitung,
+- Wartezeit auf das Modell,
+- reine Inferenzzeit und Echtzeitfaktor,
+- Audioqualität und mittleren Pegel,
+- Cache- und Persistenzstatus.
+
+Wird ein bereits erfolgreich geladener Modellcache mindestens zweimal nach einem Browserneustart leer vorgefunden, wird der Cache als unzuverlässig gekennzeichnet. Der Eskalationspfad ist dann: Website als App installieren oder die Website in den Browser-Einstellungen vom automatischen Löschen der Websitedaten ausnehmen. Ein Service Worker wird nicht vorsorglich eingebaut, weil Transformers.js Modelle und WASM bereits selbst über die Cache API verwaltet.
 
 Es werden bewusst keine festen Aussagen zu Downloadgröße oder Geschwindigkeit gemacht. Modellinitialisierung und Transkriptionsdauer hängen von Modellartefakten, Browser, WebGPU-Verfügbarkeit, CPU/GPU und Aufnahmelänge ab.
 
@@ -58,7 +75,7 @@ Es werden bewusst keine festen Aussagen zu Downloadgröße oder Geschwindigkeit 
 | Zustand | Enter | Escape |
 |---|---|---|
 | Texteingabe | klassifizieren | Eingabe und Ergebnis löschen |
-| Aufnahme läuft | Aufnahme beenden und transkribieren | Aufnahme verwerfen |
+| Aufnahme läuft | 300-ms-Nachlauf starten, dann transkribieren | Aufnahme verwerfen |
 | Audioaufbereitung läuft | keine Aktion | Verarbeitung verwerfen |
 | Modellladen oder Transkription | keine Aktion | Ergebnis verwerfen |
 | Ergebnis sichtbar | erneut klassifizieren | Eingabe und Ergebnis löschen |
@@ -126,7 +143,7 @@ npm run test:run
 npm run build
 ```
 
-Die Regressionstests enthalten mehr als 50 kurze und vollständige Intervieweingaben aus Strategie, KI, Digitalisierung, Produkt-, Prozess- und Transformationskontexten. Zusätzlich werden Varianten, schwache Evidenz, lokale Overrides, Kanal-Mischung und 16-kHz-Resampling geprüft.
+Die Regressionstests enthalten mehr als 50 kurze und vollständige Intervieweingaben aus Strategie, KI, Digitalisierung, Produkt-, Prozess- und Transformationskontexten. Zusätzlich werden Varianten, schwache Evidenz, lokale Overrides, Kanal-Mischung, 16-kHz-Resampling, Audioqualitäts-Gates und die Performance-Empfehlungsregel geprüft.
 
 Pull Requests und Feature-Branches werden über `.github/workflows/validate.yml` getestet und gebaut. Pushes auf `main` werden über `.github/workflows/deploy.yml` getestet, gebaut und auf GitHub Pages veröffentlicht.
 
@@ -134,14 +151,29 @@ Pull Requests und Feature-Branches werden über `.github/workflows/validate.yml`
 
 Der Produktions-Build prüft TypeScript, Worker-Bundling und statische Assets. Mikrofon, Modell-Download und Hardware-Backends müssen zusätzlich im echten Browser geprüft werden:
 
-1. erste Aufnahme mit WebGPU,
-2. zweite Aufnahme ohne erneuten vollständigen Modelldownload,
+1. erste Aufnahme mit WebGPU und leerem Modellcache,
+2. zweite Aufnahme in derselben Sitzung,
 3. Browser schließen und erneut öffnen,
-4. Offline-Modus nach erfolgreichem Modelldownload,
-5. WASM-Fallback ohne WebGPU,
-6. Aufnahme mit 5 bis 15 Sekunden Länge,
-7. Escape während Aufnahme und während Transkription,
-8. Transkript korrigieren und erneut mit Enter klassifizieren.
+4. prüfen, ob der Cache erhalten blieb,
+5. Offline-Modus nach erfolgreichem Modelldownload,
+6. technischer FP16-Fehlerpfad auf q8/q8,
+7. WASM-Fallback ohne WebGPU,
+8. Aufnahme mit 5 bis 15 Sekunden Länge,
+9. Escape während Aufnahme und während Transkription,
+10. Transkript korrigieren und erneut mit Enter klassifizieren.
+
+Für einen A/B-Vergleich müssen beide Modellprofile dieselbe Audiodatei erhalten. Als Referenz werden nur Aufnahmen verwendet, welche die eingebaute Audioqualitätsprüfung nicht als ungeeignet markiert. Zehn empfohlene Testfragen sind:
+
+1. Wie würden Sie eine Make-or-Buy-Entscheidung treffen?
+2. Wie entwickeln Sie eine KI-Strategie?
+3. Wie priorisieren Sie mehrere Use Cases?
+4. Wie entscheiden Sie über ein Go oder No-Go?
+5. Wie skalieren Sie einen erfolgreichen Piloten?
+6. Wie erstellen Sie einen belastbaren Business Case?
+7. Wie würden Sie ein Target Operating Model entwickeln?
+8. Wie gehen Sie mit Widerstand von Stakeholdern um?
+9. Wie prüfen Sie die Anforderungen des EU AI Act?
+10. Wie führen Sie einen Proof of Concept in den Betrieb über?
 
 ## GitHub Pages
 

@@ -1,33 +1,42 @@
 import { env, pipeline } from '@huggingface/transformers'
 import type {
   SpeechBackend,
+  SpeechProfile,
   SpeechProgressMessage,
   SpeechWorkerMessage,
   SpeechWorkerRequest,
 } from '../types/speech'
 
-const PRIMARY_MODEL = 'onnx-community/whisper-base'
-const FALLBACK_MODEL = 'onnx-community/whisper-tiny'
+const BASE_MODEL = 'onnx-community/whisper-base'
+const CPU_FALLBACK_MODEL = 'onnx-community/whisper-tiny'
 
 type TranscriptionOutput = { text?: string } | Array<{ text?: string }>
-type Transcriber = (
+type Transcriber = ((
   audio: Float32Array,
   options: {
     language: string
     task: 'transcribe'
     return_timestamps: false
   },
-) => Promise<TranscriptionOutput>
+) => Promise<TranscriptionOutput>) & {
+  dispose?: () => void | Promise<void>
+}
 
 type LoadedPipeline = {
   transcriber: Transcriber
   backend: SpeechBackend
+  profile: SpeechProfile
   model: string
+  modelLoadMs: number
 }
 
+type WebGpuProfile = Exclude<SpeechProfile, 'cpu-tiny-q8'>
+
 let loadedPipeline: Promise<LoadedPipeline> | null = null
+let loadedProfile: SpeechProfile | null = null
 
 env.useBrowserCache = true
+env.useWasmCache = true
 env.allowLocalModels = false
 const wasmBackend = env.backends.onnx.wasm
 if (wasmBackend) {
@@ -55,68 +64,135 @@ function progressMessage(id: string, value: unknown): SpeechProgressMessage {
   }
 }
 
+function profileLabel(profile: SpeechProfile): string {
+  if (profile === 'quality-fp16-q8') return 'Whisper Base · Encoder FP16 / Decoder q8'
+  if (profile === 'balanced-q8') return 'Whisper Base · q8/q8'
+  return 'Whisper Tiny · CPU q8'
+}
+
+async function disposeLoadedPipeline(): Promise<void> {
+  const current = loadedPipeline
+  loadedPipeline = null
+  loadedProfile = null
+  if (!current) return
+  try {
+    const resolved = await current
+    await resolved.transcriber.dispose?.()
+  } catch {
+    // A failed pipeline has nothing reliable to dispose.
+  }
+}
+
 async function createTranscriber(
   id: string,
-  backend: SpeechBackend,
-  model: string,
+  profile: SpeechProfile,
 ): Promise<LoadedPipeline> {
+  const startedAt = performance.now()
+  const backend: SpeechBackend = profile === 'cpu-tiny-q8' ? 'wasm' : 'webgpu'
+  const model = profile === 'cpu-tiny-q8' ? CPU_FALLBACK_MODEL : BASE_MODEL
+
   send({
     type: 'status',
     id,
     phase: 'loading-model',
     backend,
+    profile,
     model,
-    message: backend === 'webgpu'
-      ? 'Whisper Base wird für WebGPU geladen.'
-      : 'Whisper Tiny wird für die CPU geladen.',
+    message: `${profileLabel(profile)} wird vorbereitet.`,
   })
+
+  const dtype = profile === 'quality-fp16-q8'
+    ? { encoder_model: 'fp16', decoder_model_merged: 'q8' } as const
+    : profile === 'balanced-q8'
+      ? { encoder_model: 'q8', decoder_model_merged: 'q8' } as const
+      : 'q8' as const
 
   const instance = await pipeline('automatic-speech-recognition', model, {
     device: backend,
-    dtype: backend === 'webgpu' ? 'q4' : 'q8',
+    dtype,
     progress_callback: (value) => send(progressMessage(id, value)),
   })
 
   return {
     transcriber: instance as unknown as Transcriber,
     backend,
+    profile,
     model,
+    modelLoadMs: Math.round(performance.now() - startedAt),
   }
 }
 
-async function getPipeline(id: string, forceWasm = false): Promise<LoadedPipeline> {
-  if (forceWasm) loadedPipeline = null
-  if (loadedPipeline) return loadedPipeline
+function candidateProfiles(preferred: WebGpuProfile): SpeechProfile[] {
+  const webGpuAvailable = typeof navigator !== 'undefined' && 'gpu' in navigator
+  if (!webGpuAvailable) return ['cpu-tiny-q8']
+  return preferred === 'quality-fp16-q8'
+    ? ['quality-fp16-q8', 'balanced-q8', 'cpu-tiny-q8']
+    : ['balanced-q8', 'cpu-tiny-q8']
+}
 
-  const webGpuAvailable = !forceWasm && typeof navigator !== 'undefined' && 'gpu' in navigator
-
-  loadedPipeline = (async () => {
-    if (webGpuAvailable) {
-      try {
-        return await createTranscriber(id, 'webgpu', PRIMARY_MODEL)
-      } catch (error) {
+async function startPipeline(
+  id: string,
+  preferred: WebGpuProfile,
+): Promise<LoadedPipeline> {
+  let lastError: unknown
+  for (const profile of candidateProfiles(preferred)) {
+    try {
+      const next = await createTranscriber(id, profile)
+      loadedProfile = next.profile
+      return next
+    } catch (error) {
+      lastError = error
+      const nextProfile = profile === 'quality-fp16-q8'
+        ? 'balanced-q8'
+        : profile === 'balanced-q8'
+          ? 'cpu-tiny-q8'
+          : null
+      if (nextProfile) {
         send({
           type: 'status',
           id,
           phase: 'fallback',
-          backend: 'wasm',
-          model: FALLBACK_MODEL,
-          message: error instanceof Error
-            ? `WebGPU nicht nutzbar (${error.message}). Wechsel auf CPU.`
-            : 'WebGPU nicht nutzbar. Wechsel auf CPU.',
+          profile: nextProfile,
+          backend: nextProfile === 'cpu-tiny-q8' ? 'wasm' : 'webgpu',
+          model: nextProfile === 'cpu-tiny-q8' ? CPU_FALLBACK_MODEL : BASE_MODEL,
+          message: `${profileLabel(profile)} ist technisch fehlgeschlagen. Fallback auf ${profileLabel(nextProfile)}.`,
         })
       }
     }
+  }
 
-    return createTranscriber(id, 'wasm', FALLBACK_MODEL)
-  })()
+  throw lastError instanceof Error ? lastError : new Error('Kein Sprachmodell konnte initialisiert werden.')
+}
 
+async function getPipeline(
+  id: string,
+  preferred: WebGpuProfile,
+): Promise<{ pipeline: LoadedPipeline; reused: boolean }> {
+  if (loadedPipeline && loadedProfile) {
+    const acceptable = loadedProfile === preferred
+      || (preferred === 'quality-fp16-q8' && loadedProfile === 'balanced-q8')
+      || loadedProfile === 'cpu-tiny-q8'
+    if (acceptable) return { pipeline: await loadedPipeline, reused: true }
+    await disposeLoadedPipeline()
+  }
+
+  loadedProfile = preferred
+  loadedPipeline = startPipeline(id, preferred)
   try {
-    return await loadedPipeline
+    return { pipeline: await loadedPipeline, reused: false }
   } catch (error) {
     loadedPipeline = null
+    loadedProfile = null
     throw error
   }
+}
+
+async function replacePipeline(
+  id: string,
+  preferred: WebGpuProfile,
+): Promise<LoadedPipeline> {
+  await disposeLoadedPipeline()
+  return (await getPipeline(id, preferred)).pipeline
 }
 
 function extractText(output: TranscriptionOutput): string {
@@ -124,46 +200,86 @@ function extractText(output: TranscriptionOutput): string {
   return output.text?.trim() ?? ''
 }
 
-async function transcribe(request: SpeechWorkerRequest): Promise<void> {
+async function prepare(request: Extract<SpeechWorkerRequest, { type: 'prepare' }>): Promise<void> {
+  const resolved = await getPipeline(request.id, request.preferredProfile)
+  send({
+    type: 'ready',
+    id: request.id,
+    backend: resolved.pipeline.backend,
+    profile: resolved.pipeline.profile,
+    model: resolved.pipeline.model,
+    modelLoadMs: resolved.pipeline.modelLoadMs,
+    reused: resolved.reused,
+  })
+}
+
+async function runInference(
+  active: LoadedPipeline,
+  audio: Float32Array,
+): Promise<{ output: TranscriptionOutput; inferenceMs: number }> {
   const startedAt = performance.now()
-  let active = await getPipeline(request.id)
+  const output = await active.transcriber(audio, {
+    language: 'german',
+    task: 'transcribe',
+    return_timestamps: false,
+  })
+  return { output, inferenceMs: Math.round(performance.now() - startedAt) }
+}
+
+async function transcribe(request: Extract<SpeechWorkerRequest, { type: 'transcribe' }>): Promise<void> {
+  const workerStartedAt = performance.now()
+  const modelWaitStartedAt = performance.now()
+  const resolved = await getPipeline(request.id, request.preferredProfile)
+  let active = resolved.pipeline
+  const modelWaitMs = Math.round(performance.now() - modelWaitStartedAt)
 
   send({
     type: 'status',
     id: request.id,
     phase: 'transcribing',
     backend: active.backend,
+    profile: active.profile,
     model: active.model,
-    message: 'Transkription läuft.',
+    message: `Transkription läuft · ${profileLabel(active.profile)}.`,
   })
 
-  let output: TranscriptionOutput
+  let inference: { output: TranscriptionOutput; inferenceMs: number }
   try {
-    output = await active.transcriber(request.audio, {
-      language: 'german',
-      task: 'transcribe',
-      return_timestamps: false,
-    })
+    inference = await runInference(active, request.audio)
   } catch (error) {
-    if (active.backend !== 'webgpu') throw error
-
-    send({
-      type: 'status',
-      id: request.id,
-      phase: 'fallback',
-      backend: 'wasm',
-      model: FALLBACK_MODEL,
-      message: 'WebGPU-Inferenz fehlgeschlagen. Erneuter Versuch auf der CPU.',
-    })
-    active = await getPipeline(request.id, true)
-    output = await active.transcriber(request.audio, {
-      language: 'german',
-      task: 'transcribe',
-      return_timestamps: false,
-    })
+    if (active.profile === 'quality-fp16-q8') {
+      send({
+        type: 'status',
+        id: request.id,
+        phase: 'fallback',
+        backend: 'webgpu',
+        profile: 'balanced-q8',
+        model: BASE_MODEL,
+        message: 'FP16-WebGPU-Inferenz fehlgeschlagen. Erneuter Versuch mit q8/q8.',
+      })
+      active = await replacePipeline(request.id, 'balanced-q8')
+      inference = await runInference(active, request.audio)
+    } else if (active.profile === 'balanced-q8') {
+      send({
+        type: 'status',
+        id: request.id,
+        phase: 'fallback',
+        backend: 'wasm',
+        profile: 'cpu-tiny-q8',
+        model: CPU_FALLBACK_MODEL,
+        message: 'WebGPU-Inferenz fehlgeschlagen. Erneuter Versuch mit Whisper Tiny auf der CPU.',
+      })
+      await disposeLoadedPipeline()
+      loadedProfile = 'cpu-tiny-q8'
+      loadedPipeline = createTranscriber(request.id, 'cpu-tiny-q8')
+      active = await loadedPipeline
+      inference = await runInference(active, request.audio)
+    } else {
+      throw error
+    }
   }
 
-  const text = extractText(output)
+  const text = extractText(inference.output)
   if (!text) throw new Error('Whisper hat keinen Text erkannt.')
 
   send({
@@ -171,18 +287,26 @@ async function transcribe(request: SpeechWorkerRequest): Promise<void> {
     id: request.id,
     text,
     backend: active.backend,
+    profile: active.profile,
     model: active.model,
-    durationMs: Math.round(performance.now() - startedAt),
+    modelWaitMs,
+    modelLoadMs: active.modelLoadMs,
+    inferenceMs: inference.inferenceMs,
+    totalWorkerMs: Math.round(performance.now() - workerStartedAt),
+    audioDurationMs: request.audioDurationMs,
+    realtimeFactor: request.audioDurationMs > 0
+      ? Math.round(inference.inferenceMs / request.audioDurationMs * 100) / 100
+      : 0,
   })
 }
 
 self.addEventListener('message', (event: MessageEvent<SpeechWorkerRequest>) => {
-  if (event.data.type !== 'transcribe') return
-
-  void transcribe(event.data).catch((error) => {
+  const request = event.data
+  const operation = request.type === 'prepare' ? prepare(request) : transcribe(request)
+  void operation.catch((error) => {
     send({
       type: 'error',
-      id: event.data.id,
+      id: request.id,
       message: error instanceof Error ? error.message : 'Transkription fehlgeschlagen.',
     })
   })
