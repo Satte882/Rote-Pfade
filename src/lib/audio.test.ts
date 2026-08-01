@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { mixChannelsToMono, resampleMono, WHISPER_SAMPLE_RATE } from './audio'
+import {
+  assessAudioQuality,
+  mixChannelsToMono,
+  resampleMono,
+  WHISPER_SAMPLE_RATE,
+} from './audio'
 
 describe('mixChannelsToMono', () => {
   it('returns a copy for mono input', () => {
@@ -40,5 +45,35 @@ describe('resampleMono', () => {
 
   it('rejects invalid sample rates', () => {
     expect(() => resampleMono(new Float32Array([1]), 0)).toThrow('Abtastrate')
+  })
+})
+
+describe('assessAudioQuality', () => {
+  it('accepts a clear reference recording', () => {
+    const audio = new Float32Array(WHISPER_SAMPLE_RATE * 2)
+    for (let index = 0; index < audio.length; index += 1) {
+      audio[index] = Math.sin(index / 12) * 0.12
+    }
+
+    const quality = assessAudioQuality(audio)
+    expect(quality.level).toBe('good')
+    expect(quality.benchmarkEligible).toBe(true)
+    expect(quality.durationMs).toBe(2_000)
+  })
+
+  it('rejects very quiet recordings as benchmark references', () => {
+    const audio = new Float32Array(WHISPER_SAMPLE_RATE * 2).fill(0.001)
+    const quality = assessAudioQuality(audio)
+    expect(quality.level).toBe('poor')
+    expect(quality.benchmarkEligible).toBe(false)
+    expect(quality.warnings.join(' ')).toContain('leise')
+  })
+
+  it('detects clipping', () => {
+    const audio = new Float32Array(WHISPER_SAMPLE_RATE * 2).fill(0.2)
+    audio.fill(1, 0, 1_000)
+    const quality = assessAudioQuality(audio)
+    expect(quality.level).toBe('poor')
+    expect(quality.clippingRatio).toBeGreaterThan(0.01)
   })
 })
