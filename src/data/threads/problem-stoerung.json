@@ -1,0 +1,48 @@
+{
+  "id": "problem-stoerung",
+  "name": "Problem- oder Störungsfrage",
+  "shortName": "Problem / Störung",
+  "category": "Analyse",
+  "purpose": "Das sichtbare Symptom von der eigentlichen Ursache trennen und wirksame Maßnahmen nachweisen.",
+  "description": "Passt bei geringer Nutzung, schlechten Ergebnissen, Verzögerungen oder Unzufriedenheit. Erwartet wird Diagnose statt Aktionismus.",
+  "steps": [
+    "Symptom und Auswirkung präzisieren",
+    "Ursachen mit Fakten untersuchen",
+    "Ursachen priorisieren",
+    "Gezielte Maßnahmen umsetzen",
+    "Wirkung kontrollieren und nachsteuern"
+  ],
+  "stepPrompts": [
+    "Was ist bei {topic} konkret sichtbar und wie groß ist die Auswirkung?",
+    "Welche Daten, Gespräche oder Beobachtungen erklären die Ursache?",
+    "Welche Ursache ist zuerst zu adressieren?",
+    "Welche gezielte Maßnahme greift an dieser Ursache an?",
+    "Woran wird erkennbar, dass die Maßnahme wirkt?"
+  ],
+  "mnemonic": "Nicht sofort reparieren – zuerst diagnostizieren",
+  "cues": [
+    { "text": "funktioniert nicht", "weight": 5 },
+    { "text": "geringe nutzung", "weight": 5 },
+    { "text": "kaum genutzt", "weight": 5 },
+    { "text": "liegt hinter dem zeitplan", "weight": 4 },
+    { "text": "schlechte ergebnisse", "weight": 5 },
+    { "text": "unzufrieden", "weight": 3 },
+    { "text": "problem lösen", "weight": 3 },
+    { "text": "was tun sie", "weight": 2 },
+    { "text": "störung", "weight": 4 },
+    { "text": "ursache", "weight": 3 }
+  ],
+  "antiCues": [
+    { "text": "wie entscheiden", "weight": 3 },
+    { "text": "was ist der unterschied", "weight": 4 },
+    { "text": "erfolg messen", "weight": 3 }
+  ],
+  "examples": [
+    "Der technisch erfolgreiche KI-Pilot wird von den Mitarbeitern kaum genutzt. Was tun Sie?",
+    "Ein Transformationsprojekt liegt deutlich hinter dem Zeitplan. Wie reagieren Sie?",
+    "Die Fachabteilung ist mit den Ergebnissen der neuen Lösung unzufrieden.",
+    "Das Modell liefert in bestimmten Fällen schlechte Ergebnisse. Wie gehen Sie vor?"
+  ],
+  "opening": "Ich würde bei {topic} nicht sofort eine Maßnahme setzen, sondern zuerst das Symptom präzisieren und die tatsächlichen Ursachen belegen.",
+  "relatedIds": ["stakeholder-change", "wirkung", "risiko-governance"]
+}

@@ -1,0 +1,47 @@
+{
+  "id": "priorisierung",
+  "name": "Priorisierungs- und Portfoliofrage",
+  "shortName": "Priorisierung / Portfolio",
+  "category": "Steuerung",
+  "purpose": "Mehrere Vorhaben nach einheitlichen Kriterien, Abhängigkeiten und realer Umsetzbarkeit in eine Roadmap bringen.",
+  "description": "Passt bei mehreren Use Cases, knappen Ressourcen, Reihenfolge, Roadmap oder Portfolioentscheidungen.",
+  "steps": [
+    "Strategische und operative Ziele klären",
+    "Einheitliche Kriterien definieren",
+    "Vorhaben transparent bewerten",
+    "Abhängigkeiten und Kapazitäten berücksichtigen",
+    "Reihenfolge und Roadmap festlegen"
+  ],
+  "stepPrompts": [
+    "Welche Ziele soll das Portfolio bei {topic} unterstützen?",
+    "Welche Kriterien wie Nutzen, Dringlichkeit, Machbarkeit, Datenreife, Risiko und Aufwand gelten?",
+    "Wie schneiden die Vorhaben anhand derselben Kriterien ab?",
+    "Welche Grundlagen, Abhängigkeiten und Kapazitätsgrenzen verändern die Reihenfolge?",
+    "Welche realistische Roadmap entsteht daraus?"
+  ],
+  "mnemonic": "Priorisierung ist mehr als eine Punktzahl",
+  "cues": [
+    { "text": "priorisieren", "weight": 7 },
+    { "text": "mehrere use cases", "weight": 6 },
+    { "text": "welches projekt zuerst", "weight": 7 },
+    { "text": "roadmap", "weight": 5 },
+    { "text": "begrenzte ressourcen", "weight": 6 },
+    { "text": "portfolio", "weight": 6 },
+    { "text": "reihenfolge", "weight": 5 },
+    { "text": "kapazitäten", "weight": 3 },
+    { "text": "ranking", "weight": 3 }
+  ],
+  "antiCues": [
+    { "text": "zwischen zwei lösungen", "weight": 2 },
+    { "text": "wie messen sie", "weight": 3 },
+    { "text": "erzählen sie von", "weight": 4 }
+  ],
+  "examples": [
+    "Wie priorisieren Sie mehrere KI-Use-Cases?",
+    "Welches Digitalisierungsprojekt würden Sie bei begrenzten Ressourcen zuerst umsetzen?",
+    "Wie erstellen Sie eine belastbare Transformationsroadmap?",
+    "Wie verbinden Sie Portfolio-Scoring mit Abhängigkeiten und Kapazitäten?"
+  ],
+  "opening": "Bei {topic} leite ich die Priorisierung aus den Zielen ab, nutze einheitliche Kriterien und berücksichtige zusätzlich Abhängigkeiten und reale Kapazitäten.",
+  "relatedIds": ["entscheidung", "wirkung", "ki-eignung"]
+}

@@ -1,0 +1,48 @@
+{
+  "id": "entscheidung-unsicherheit",
+  "name": "Entscheidungsfrage unter Unsicherheit",
+  "shortName": "Entscheidung unter Unsicherheit",
+  "category": "Entscheidung",
+  "purpose": "Trotz unvollständiger Evidenz eine belastbare, begrenzte und möglichst reversible Entscheidung ermöglichen.",
+  "description": "Passt, wenn wichtige Informationen fehlen, Prognosen unsicher sind oder eine Entscheidung nicht bis zur vollständigen Klärung warten kann.",
+  "steps": [
+    "Fehlende Informationen identifizieren",
+    "Entscheidungskritische Unsicherheiten bestimmen",
+    "Unsicherheit gezielt reduzieren",
+    "Begrenzte und reversible Entscheidung treffen",
+    "Ergebnis überprüfen und nachsteuern"
+  ],
+  "stepPrompts": [
+    "Welche Informationen fehlen bei {topic}?",
+    "Welche dieser Lücken könnten die Entscheidung tatsächlich verändern?",
+    "Wie lassen sich diese Unsicherheiten schnell und gezielt reduzieren?",
+    "Welche kleine, begrenzte oder reversible Entscheidung ist jetzt vertretbar?",
+    "Welche Signale lösen Nachschärfung, Rollout oder Abbruch aus?"
+  ],
+  "mnemonic": "Nicht alles wissen – das Entscheidende absichern",
+  "cues": [
+    { "text": "unter unsicherheit", "weight": 7 },
+    { "text": "unvollständige informationen", "weight": 7 },
+    { "text": "informationen fehlen", "weight": 6 },
+    { "text": "unklare datenlage", "weight": 6 },
+    { "text": "trotz fehlender daten", "weight": 6 },
+    { "text": "noch nicht wissen", "weight": 4 },
+    { "text": "begrenzte entscheidung", "weight": 4 },
+    { "text": "reversibel", "weight": 4 },
+    { "text": "pilotieren", "weight": 2 },
+    { "text": "nachsteuern", "weight": 2 }
+  ],
+  "antiCues": [
+    { "text": "make or buy", "weight": 2 },
+    { "text": "was ist der unterschied", "weight": 4 },
+    { "text": "erzählen sie von", "weight": 4 }
+  ],
+  "examples": [
+    "Wie entscheiden Sie über den nächsten Pilot-Schritt, obwohl noch keine vollständigen Nutzungsdaten vorliegen?",
+    "Das Management verlangt eine Empfehlung, aber wesentliche Informationen fehlen.",
+    "Wie gehen Sie mit einer unklaren Datenlage bei einer strategischen Entscheidung um?",
+    "Sie müssen handeln, obwohl die technische Machbarkeit noch nicht abschließend belegt ist."
+  ],
+  "opening": "Bei {topic} kläre ich zuerst, welche Informationen fehlen und welche davon wirklich entscheidungskritisch sind. Danach reduziere ich gezielt die größte Unsicherheit.",
+  "relatedIds": ["entscheidung", "risiko-governance", "ki-eignung"]
+}

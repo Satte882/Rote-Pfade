@@ -1,0 +1,48 @@
+{
+  "id": "risiko-governance",
+  "name": "Risiko- und Governance-Frage",
+  "shortName": "Risiko / Governance",
+  "category": "Governance",
+  "purpose": "Risiken im Nutzungskontext identifizieren, bewerten, behandeln, bewusst entscheiden und im Betrieb überwachen.",
+  "description": "Passt bei Compliance, Datenschutz, kritischen Modellergebnissen, Kontrollmechanismen oder verbleibenden Risiken.",
+  "steps": [
+    "Risiken im Nutzungskontext identifizieren",
+    "Eintritt und Auswirkung bewerten",
+    "Vermeidung, Reduktion und Kontrollen definieren",
+    "Restrisiko bewusst entscheiden lassen",
+    "Risiken und Kontrollen überwachen"
+  ],
+  "stepPrompts": [
+    "Welche fachlichen, rechtlichen, technischen und organisatorischen Risiken bestehen bei {topic}?",
+    "Wie wahrscheinlich und wie schwerwiegend sind sie?",
+    "Welche Kontrollen, Begrenzungen oder Alternativen reduzieren sie?",
+    "Wer darf das verbleibende Risiko akzeptieren oder die Nutzung ablehnen?",
+    "Wie werden Risiken, Vorfälle und Kontrollwirksamkeit im Betrieb überwacht?"
+  ],
+  "mnemonic": "Risiken werden nicht einfach beseitigt – sie werden gesteuert",
+  "cues": [
+    { "text": "risiken", "weight": 4 },
+    { "text": "compliance", "weight": 6 },
+    { "text": "datenschutz", "weight": 5 },
+    { "text": "governance", "weight": 6 },
+    { "text": "kritische modellergebnisse", "weight": 6 },
+    { "text": "sicherheit", "weight": 4 },
+    { "text": "eu ai act", "weight": 6 },
+    { "text": "kontrollen", "weight": 3 },
+    { "text": "restrisiko", "weight": 5 },
+    { "text": "überwachen", "weight": 2 }
+  ],
+  "antiCues": [
+    { "text": "fachbereich und it", "weight": 2 },
+    { "text": "blockiert", "weight": 2 },
+    { "text": "wie messen sie den erfolg", "weight": 4 }
+  ],
+  "examples": [
+    "Wie bewerten Sie die Risiken einer KI-Anwendung?",
+    "Wie stellen Sie Datenschutz und Compliance bei einem GenAI-Use-Case sicher?",
+    "Was tun Sie bei kritischen oder unzuverlässigen Modellergebnissen?",
+    "Wie verankern Sie Governance im Betrieb einer KI-Lösung?"
+  ],
+  "opening": "Bei {topic} betrachte ich Risiken nicht isoliert im Modell, sondern entlang des gesamten Nutzungskontexts und der möglichen Auswirkungen.",
+  "relatedIds": ["entscheidung-unsicherheit", "stakeholder-konflikt", "ki-eignung"]
+}

@@ -1,0 +1,47 @@
+{
+  "id": "stakeholder-change",
+  "name": "Stakeholder- und Change-Frage",
+  "shortName": "Stakeholder / Change",
+  "category": "Menschen & Organisation",
+  "purpose": "Betroffene früh beteiligen, befähigen und die Veränderung organisatorisch verankern.",
+  "description": "Passt bei Akzeptanz, Widerstand, Mitarbeiterbeteiligung oder der Einführung neuer Arbeitsweisen.",
+  "steps": [
+    "Betroffene und Interessen verstehen",
+    "Schlüsselpersonen früh beteiligen",
+    "Nutzen und Auswirkungen konkret kommunizieren",
+    "Nutzer befähigen und unterstützen",
+    "Veränderung in Prozessen, Rollen und Zielen verankern"
+  ],
+  "stepPrompts": [
+    "Wer ist von {topic} betroffen und welche Interessen oder Befürchtungen bestehen?",
+    "Welche Schlüsselpersonen müssen an Gestaltung und Pilot beteiligt werden?",
+    "Welcher konkrete Nutzen und welche Veränderung müssen transparent werden?",
+    "Welche Schulung, Unterstützung und Führung sind notwendig?",
+    "Wie wird die neue Arbeitsweise dauerhaft in Rollen, Prozessen und Zielen verankert?"
+  ],
+  "mnemonic": "Change ist keine Kommunikationskampagne",
+  "cues": [
+    { "text": "mitarbeiter mitnehmen", "weight": 7 },
+    { "text": "widerstand", "weight": 6 },
+    { "text": "akzeptanz", "weight": 6 },
+    { "text": "neue arbeitsweisen", "weight": 5 },
+    { "text": "change", "weight": 4 },
+    { "text": "beteiligung", "weight": 3 },
+    { "text": "schulung", "weight": 3 },
+    { "text": "adoption", "weight": 5 },
+    { "text": "nutzung erhöhen", "weight": 3 }
+  ],
+  "antiCues": [
+    { "text": "beide seiten", "weight": 2 },
+    { "text": "blockiert wegen", "weight": 3 },
+    { "text": "entscheidung herbeiführen", "weight": 3 }
+  ],
+  "examples": [
+    "Wie nehmen Sie Mitarbeiter bei der Einführung einer KI-Lösung mit?",
+    "Wie gehen Sie mit Widerstand gegen neue digitale Arbeitsweisen um?",
+    "Wie schaffen Sie nachhaltige Akzeptanz für einen KI-Assistenten?",
+    "Was tun Sie, damit ein erfolgreicher Pilot im Alltag tatsächlich genutzt wird?"
+  ],
+  "opening": "Bei {topic} identifiziere ich zuerst die betroffenen Gruppen und ihre konkreten Interessen, bevor ich Beteiligung, Befähigung und Verankerung plane.",
+  "relatedIds": ["stakeholder-konflikt", "problem-stoerung", "skalierung"]
+}

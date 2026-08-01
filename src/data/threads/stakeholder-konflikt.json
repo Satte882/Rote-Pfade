@@ -1,0 +1,48 @@
+{
+  "id": "stakeholder-konflikt",
+  "name": "Stakeholder-Konflikt- und Moderationsfrage",
+  "shortName": "Konflikt / Moderation",
+  "category": "Menschen & Organisation",
+  "purpose": "Gegensätzliche Positionen in einen faktenbasierten Entscheidungsprozess überführen, statt Partei zu ergreifen.",
+  "description": "Passt, wenn Fachbereich, IT, Datenschutz oder Management unterschiedliche Interessen vertreten und eine Entscheidung blockiert ist.",
+  "steps": [
+    "Positionen und dahinterliegende Interessen verstehen",
+    "Gemeinsame Fakten und Entscheidungsrahmen schaffen",
+    "Tragfähige Optionen entwickeln",
+    "Begründete Empfehlung aussprechen",
+    "Entscheidung, Verantwortlichkeiten und weiteres Vorgehen festlegen"
+  ],
+  "stepPrompts": [
+    "Welche Positionen und Interessen stehen sich bei {topic} gegenüber?",
+    "Welche gemeinsamen Fakten, Anforderungen und Entscheidungsregeln braucht es?",
+    "Welche Optionen berücksichtigen die wesentlichen Interessen beider Seiten?",
+    "Welche Option empfehle ich mit welchen Trade-offs?",
+    "Wer entscheidet, wer übernimmt was und wann wird eskaliert oder überprüft?"
+  ],
+  "mnemonic": "Entscheidungsprozess herstellen – nicht Partei ergreifen",
+  "cues": [
+    { "text": "fachbereich und it", "weight": 7 },
+    { "text": "beide seiten", "weight": 5 },
+    { "text": "blockiert", "weight": 5 },
+    { "text": "unterschiedliche interessen", "weight": 6 },
+    { "text": "sind sich nicht einig", "weight": 6 },
+    { "text": "stakeholder konflikt", "weight": 7 },
+    { "text": "datenschutz blockt", "weight": 6 },
+    { "text": "management übergeht", "weight": 4 },
+    { "text": "eskalieren", "weight": 4 },
+    { "text": "moderieren", "weight": 5 }
+  ],
+  "antiCues": [
+    { "text": "mitarbeiter mitnehmen", "weight": 3 },
+    { "text": "geringe nutzung", "weight": 2 },
+    { "text": "risiken bewerten", "weight": 2 }
+  ],
+  "examples": [
+    "Der Fachbereich will einen KI-Chatbot, aber die IT blockiert wegen Datenschutz.",
+    "Fachbereich und IT sind überzeugt, mit ihren Positionen im Recht zu sein. Wie moderieren Sie?",
+    "Ein wichtiger Stakeholder blockiert das Projekt trotz Managementpriorität.",
+    "Wie führen Sie bei gegensätzlichen Interessen eine belastbare Entscheidung herbei?"
+  ],
+  "opening": "Bei {topic} höre ich zuerst beide Seiten an und trenne ihre Positionen von den dahinterliegenden Interessen. Danach schaffe ich eine gemeinsame Faktenbasis.",
+  "relatedIds": ["stakeholder-change", "risiko-governance", "entscheidung-unsicherheit"]
+}

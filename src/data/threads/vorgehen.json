@@ -1,0 +1,46 @@
+{
+  "id": "vorgehen",
+  "name": "Vorgehensfrage",
+  "shortName": "Vorgehen",
+  "category": "Vorgehen",
+  "purpose": "Ein strukturiertes, nachvollziehbares Vorgehen vom Auftrag bis zum nächsten Schritt zeigen.",
+  "description": "Passt, wenn nach deinem generellen Vorgehen, einem Projektstart oder dem Weg von der Idee zur Umsetzung gefragt wird.",
+  "steps": [
+    "Ziel und Auftrag klären",
+    "Ausgangslage und Rahmenbedingungen analysieren",
+    "Vorgehen und Optionen entwickeln",
+    "Ergebnis oder Empfehlung ableiten",
+    "Nächsten Umsetzungsschritt festlegen"
+  ],
+  "stepPrompts": [
+    "Welches Ziel und welcher Auftrag gelten für {topic}?",
+    "Welche Ausgangslage, Stakeholder und Rahmenbedingungen prägen {topic}?",
+    "Welche Arbeitsschritte und Lösungsoptionen sind sinnvoll?",
+    "Welches Ergebnis oder welche Empfehlung entsteht daraus?",
+    "Was passiert nach der Entscheidung konkret?"
+  ],
+  "mnemonic": "Verstehen – analysieren – gestalten – entscheiden – umsetzen",
+  "cues": [
+    { "text": "wie würden sie vorgehen", "weight": 5 },
+    { "text": "wie gehen sie vor", "weight": 5 },
+    { "text": "wie starten sie", "weight": 4 },
+    { "text": "vorgehensweise", "weight": 4 },
+    { "text": "von der idee zur umsetzung", "weight": 5 },
+    { "text": "prozessanalyse durchführen", "weight": 4 },
+    { "text": "projekt starten", "weight": 3 },
+    { "text": "erster schritt", "weight": 2 }
+  ],
+  "antiCues": [
+    { "text": "warum funktioniert", "weight": 3 },
+    { "text": "unterschied zwischen", "weight": 4 },
+    { "text": "erzählen sie von", "weight": 4 }
+  ],
+  "examples": [
+    "Wie gehen Sie vor, wenn ein Fachbereich erstmals einen KI-Anwendungsfall einbringen möchte?",
+    "Wie starten Sie ein bereichsübergreifendes Digitalisierungsprojekt?",
+    "Wie kommen Sie von einer groben Prozessidee zu einer umsetzbaren Lösung?",
+    "Wie führen Sie eine strukturierte Prozessanalyse durch?"
+  ],
+  "opening": "Zuerst kläre ich Ziel, Auftrag und Entscheidungsspielraum für {topic}. Danach analysiere ich die Ausgangslage und strukturiere das weitere Vorgehen.",
+  "relatedIds": ["ki-eignung", "entscheidung", "priorisierung"]
+}
