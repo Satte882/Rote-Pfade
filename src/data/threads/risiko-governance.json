@@ -4,32 +4,39 @@
   "shortName": "Risiko / Governance",
   "category": "Governance",
   "purpose": "Risiken im Nutzungskontext identifizieren, bewerten, behandeln, bewusst entscheiden und im Betrieb überwachen.",
-  "description": "Passt bei Compliance, Datenschutz, kritischen Modellergebnissen, Kontrollmechanismen oder verbleibenden Risiken.",
+  "description": "Passt bei Compliance, Datenschutz, Responsible AI, kritischen Modellergebnissen, Kontrollmechanismen oder verbleibenden Risiken.",
   "steps": [
-    "Risiken im Nutzungskontext identifizieren",
-    "Eintritt und Auswirkung bewerten",
-    "Vermeidung, Reduktion und Kontrollen definieren",
-    "Restrisiko bewusst entscheiden lassen",
-    "Risiken und Kontrollen überwachen"
+    "Risiken und Betroffenenwirkung im Nutzungskontext identifizieren",
+    "Eintritt, Auswirkung und regulatorische Relevanz bewerten",
+    "Kontrollen, menschliche Aufsicht und Begrenzungen definieren",
+    "Restrisiko und Freigabe bewusst entscheiden lassen",
+    "Risiken, Fairness und Kontrollwirksamkeit überwachen"
   ],
   "stepPrompts": [
-    "Welche fachlichen, rechtlichen, technischen und organisatorischen Risiken bestehen bei {topic}?",
-    "Wie wahrscheinlich und wie schwerwiegend sind sie?",
-    "Welche Kontrollen, Begrenzungen oder Alternativen reduzieren sie?",
-    "Wer darf das verbleibende Risiko akzeptieren oder die Nutzung ablehnen?",
-    "Wie werden Risiken, Vorfälle und Kontrollwirksamkeit im Betrieb überwacht?"
+    "Welche fachlichen, rechtlichen, technischen, ethischen und organisatorischen Risiken bestehen bei {topic} und wer ist betroffen?",
+    "Wie wahrscheinlich und schwerwiegend sind sie und welche Anforderungen ergeben sich aus EU AI Act, DSGVO oder Branche?",
+    "Welche Kontrollen, Erklärbarkeit, menschliche Aufsicht, Begrenzungen oder Alternativen reduzieren sie?",
+    "Wer darf das verbleibende Risiko akzeptieren, Auflagen setzen oder die Nutzung ablehnen?",
+    "Wie werden Risiken, Bias, Modellverhalten, Vorfälle und Kontrollwirksamkeit im Betrieb überwacht?"
   ],
-  "mnemonic": "Risiken werden nicht einfach beseitigt – sie werden gesteuert",
+  "mnemonic": "Kontext → Wirkung → Kontrollen → Freigabe → Monitoring",
   "cues": [
     { "text": "risiken", "weight": 4 },
     { "text": "compliance", "weight": 6 },
     { "text": "datenschutz", "weight": 5 },
-    { "text": "governance", "weight": 6 },
+    { "text": "governance", "weight": 7 },
+    { "text": "responsible ai", "weight": 8 },
+    { "text": "bias", "weight": 8 },
+    { "text": "fairness", "weight": 7 },
+    { "text": "erklärbarkeit", "weight": 7 },
+    { "text": "menschliche aufsicht", "weight": 7 },
+    { "text": "human oversight", "weight": 7 },
     { "text": "kritische modellergebnisse", "weight": 6 },
     { "text": "sicherheit", "weight": 4 },
-    { "text": "eu ai act", "weight": 6 },
+    { "text": "eu ai act", "weight": 7 },
     { "text": "kontrollen", "weight": 3 },
     { "text": "restrisiko", "weight": 5 },
+    { "text": "modellmonitoring", "weight": 6 },
     { "text": "überwachen", "weight": 2 }
   ],
   "antiCues": [
@@ -41,8 +48,10 @@
     "Wie bewerten Sie die Risiken einer KI-Anwendung?",
     "Wie stellen Sie Datenschutz und Compliance bei einem GenAI-Use-Case sicher?",
     "Was tun Sie bei kritischen oder unzuverlässigen Modellergebnissen?",
-    "Wie verankern Sie Governance im Betrieb einer KI-Lösung?"
+    "Wie verankern Sie Governance im Betrieb einer KI-Lösung?",
+    "Wie gehen Sie mit Bias und Fairness bei einem KI-Modell um?",
+    "Wie stellen Sie Erklärbarkeit und menschliche Aufsicht sicher?"
   ],
-  "opening": "Bei {topic} betrachte ich Risiken nicht isoliert im Modell, sondern entlang des gesamten Nutzungskontexts und der möglichen Auswirkungen.",
-  "relatedIds": ["entscheidung-unsicherheit", "stakeholder-konflikt", "ki-eignung"]
+  "opening": "Bei {topic} betrachte ich Risiken entlang des gesamten Nutzungskontexts: betroffene Personen, regulatorische Relevanz, technische Kontrollen, menschliche Aufsicht und laufendes Monitoring.",
+  "relatedIds": ["entscheidung-unsicherheit", "stakeholder-konflikt", "ki-eignung", "strategie-zielbild"]
 }
