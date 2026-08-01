@@ -15,6 +15,12 @@ export function LibraryView() {
     const normalizedQuery = query.trim().toLocaleLowerCase('de-DE')
     return threads.filter((thread) => {
       const matchesCategory = category === 'Alle' || thread.category === category
+      const variantText = thread.variants?.flatMap((variant) => [
+        variant.name,
+        variant.description,
+        ...variant.steps,
+        ...variant.examples,
+      ]) ?? []
       const haystack = [
         thread.name,
         thread.category,
@@ -23,6 +29,7 @@ export function LibraryView() {
         thread.mnemonic,
         ...thread.steps,
         ...thread.examples,
+        ...variantText,
       ].join(' ').toLocaleLowerCase('de-DE')
       return matchesCategory && (!normalizedQuery || haystack.includes(normalizedQuery))
     })
@@ -33,8 +40,8 @@ export function LibraryView() {
       <div className="section-heading split-heading">
         <div>
           <p className="eyebrow">Nachschlagewerk</p>
-          <h1 id="library-title">Die 13 roten Fäden</h1>
-          <p>Die Bibliothek ist im MVP lesbar und durchsuchbar; Änderungen erfolgen kontrolliert im Repository.</p>
+          <h1 id="library-title">Die {threads.length} roten Fäden</h1>
+          <p>Fäden und fachliche Varianten sind lesbar und durchsuchbar; Änderungen erfolgen kontrolliert im Repository.</p>
         </div>
         <div className="thread-count"><strong>{filteredThreads.length}</strong><span>angezeigt</span></div>
       </div>
@@ -46,7 +53,7 @@ export function LibraryView() {
             id="library-search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Name, Signal, Beispiel oder Merksatz"
+            placeholder="Name, Variante, Beispiel oder Merksatz"
           />
         </label>
         <div className="category-filters" aria-label="Kategorien">
@@ -87,6 +94,19 @@ export function LibraryView() {
                   <ol>
                     {thread.steps.map((step) => <li key={step}>{step}</li>)}
                   </ol>
+                  {thread.variants && thread.variants.length > 0 && (
+                    <div className="variant-list">
+                      <span>Fachliche Varianten</span>
+                      {thread.variants.map((variant) => (
+                        <section key={variant.id}>
+                          <strong>{variant.name}</strong>
+                          <ol>
+                            {variant.steps.map((step) => <li key={step}>{step}</li>)}
+                          </ol>
+                        </section>
+                      ))}
+                    </div>
+                  )}
                   <div className="example-list">
                     <span>Anonymisierte Beispiele</span>
                     {thread.examples.map((example) => <p key={example}>„{example}“</p>)}
