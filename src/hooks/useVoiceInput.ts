@@ -81,10 +81,7 @@ function bestAlternative(result: RecognitionResultLike): RecognitionAlternativeL
 }
 
 function cleanTranscript(parts: readonly string[]): string {
-  return parts
-    .join(' ')
-    .replace(/\s+/g, ' ')
-    .trim()
+  return parts.join(' ').replace(/\s+/g, ' ').trim()
 }
 
 function errorMessage(error: string): string {
@@ -107,7 +104,6 @@ async function checkAvailability(
   Constructor: RecognitionConstructor,
 ): Promise<LocalSpeechAvailability> {
   if (!Constructor.available) return 'unavailable'
-
   try {
     return await Constructor.available({
       langs: [LANGUAGE],
@@ -121,7 +117,6 @@ async function checkAvailability(
 
 async function installLanguagePack(Constructor: RecognitionConstructor): Promise<boolean> {
   if (!Constructor.install) return false
-
   try {
     return await Constructor.install({
       langs: [LANGUAGE],
@@ -165,6 +160,8 @@ export function useVoiceInput(onTranscript: (text: string) => void): VoiceInputS
   const interimRef = useRef('')
   const confidenceRef = useRef<number[]>([])
   const discardedRef = useRef(false)
+  const failedRef = useRef(false)
+  const operationVersionRef = useRef(0)
   const stopStartedAtRef = useRef(0)
   const transcriptCallbackRef = useRef(onTranscript)
   transcriptCallbackRef.current = onTranscript
@@ -172,17 +169,28 @@ export function useVoiceInput(onTranscript: (text: string) => void): VoiceInputS
   const Constructor = getRecognitionConstructor()
   const supported = Boolean(Constructor)
 
+  const resetBuffers = (): void => {
+    finalPartsRef.current = []
+    interimRef.current = ''
+    confidenceRef.current = []
+    setInterimText('')
+  }
+
   const finish = (recognition: RecognitionLike): void => {
     if (recognitionRef.current === recognition) recognitionRef.current = null
 
     if (discardedRef.current) {
       discardedRef.current = false
-      finalPartsRef.current = []
-      interimRef.current = ''
-      confidenceRef.current = []
-      setInterimText('')
+      failedRef.current = false
+      resetBuffers()
       setPhase('idle')
       setStatus('')
+      return
+    }
+
+    if (failedRef.current) {
+      failedRef.current = false
+      resetBuffers()
       return
     }
 
@@ -196,10 +204,7 @@ export function useVoiceInput(onTranscript: (text: string) => void): VoiceInputS
       ? confidenceRef.current.reduce((sum, value) => sum + value, 0) / confidenceRef.current.length
       : null
 
-    finalPartsRef.current = []
-    interimRef.current = ''
-    confidenceRef.current = []
-    setInterimText('')
+    resetBuffers()
     setPhase(text ? 'idle' : 'error')
     setDiagnostics((current) => ({
       ...current,
@@ -225,6 +230,7 @@ export function useVoiceInput(onTranscript: (text: string) => void): VoiceInputS
   const startRecording = async (): Promise<void> => {
     if (!Constructor || recognitionRef.current) return
 
+    const operationVersion = ++operationVersionRef.current
     setError('')
     setStatus('Lokales deutsches Sprachmodell wird geprüft.')
     setPhase('checking-model')
@@ -233,12 +239,14 @@ export function useVoiceInput(onTranscript: (text: string) => void): VoiceInputS
 
     try {
       let availability = await checkAvailability(Constructor)
+      if (operationVersion !== operationVersionRef.current) return
       setDiagnostics((current) => ({ ...current, availability }))
 
       if (availability === 'downloadable' || availability === 'downloading') {
         setPhase('installing-model')
         setStatus('Lokales deutsches Sprachmodell wird einmalig installiert.')
         const installed = await installLanguagePack(Constructor)
+        if (operationVersion !== operationVersionRef.current) return
         if (!installed) throw new Error('Das lokale deutsche Sprachmodell konnte nicht installiert werden.')
         availability = 'available'
         setDiagnostics((current) => ({ ...current, availability }))
@@ -261,13 +269,17 @@ export function useVoiceInput(onTranscript: (text: string) => void): VoiceInputS
       recognition.interimResults = true
       recognition.maxAlternatives = 3
 
-      finalPartsRef.current = []
-      interimRef.current = ''
-      confidenceRef.current = []
+      resetBuffers()
       discardedRef.current = false
+      failedRef.current = false
       stopStartedAtRef.current = 0
 
       recognition.onstart = () => {
+        if (operationVersion !== operationVersionRef.current) {
+          discardedRef.current = true
+          recognition.abort()
+          return
+        }
         setPhase('recording')
         setStatus('Aufnahme läuft · Enter beendet')
         setDiagnostics((current) => ({
@@ -302,6 +314,7 @@ export function useVoiceInput(onTranscript: (text: string) => void): VoiceInputS
       recognition.onerror = (event) => {
         const message = errorMessage(event.error)
         if (!message || discardedRef.current) return
+        failedRef.current = true
         setPhase('error')
         setStatus('')
         setError(message)
@@ -311,6 +324,7 @@ export function useVoiceInput(onTranscript: (text: string) => void): VoiceInputS
       recognitionRef.current = recognition
       recognition.start()
     } catch (startError) {
+      if (operationVersion !== operationVersionRef.current) return
       recognitionRef.current = null
       setPhase('error')
       setStatus('')
@@ -328,8 +342,10 @@ export function useVoiceInput(onTranscript: (text: string) => void): VoiceInputS
   }
 
   const discard = (): void => {
+    operationVersionRef.current += 1
     const recognition = recognitionRef.current
     discardedRef.current = true
+    failedRef.current = false
     setError('')
     setInterimText('')
     if (recognition) recognition.abort()
@@ -341,6 +357,7 @@ export function useVoiceInput(onTranscript: (text: string) => void): VoiceInputS
   }
 
   useEffect(() => () => {
+    operationVersionRef.current += 1
     discardedRef.current = true
     recognitionRef.current?.abort()
     recognitionRef.current = null
