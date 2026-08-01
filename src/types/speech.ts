@@ -7,6 +7,7 @@ export type SpeechPhase =
   | 'preparing-audio'
   | 'loading-model'
   | 'transcribing'
+  | 'discarded'
   | 'error'
 
 export type SpeechWorkerRequest = {
