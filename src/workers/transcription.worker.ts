@@ -29,8 +29,11 @@ let loadedPipeline: Promise<LoadedPipeline> | null = null
 
 env.useBrowserCache = true
 env.allowLocalModels = false
-env.backends.onnx.wasm.numThreads = 1
-env.backends.onnx.wasm.proxy = false
+const wasmBackend = env.backends.onnx.wasm
+if (wasmBackend) {
+  wasmBackend.numThreads = 1
+  wasmBackend.proxy = false
+}
 
 function send(message: SpeechWorkerMessage): void {
   self.postMessage(message)
