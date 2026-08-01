@@ -1,10 +1,26 @@
 import { useRef, useState } from 'react'
-import { classifyQuestion, threads } from '../lib/classifier'
+import { classifyQuestion, getResolvedName, getResolvedSteps, threads } from '../lib/classifier'
 import { saveFeedback } from '../lib/storage'
 import type { ClassificationResult, FeedbackEntry } from '../types/thread'
 
 function createFeedbackId(): string {
   return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
+}
+
+function encodeSelection(threadId: string, variantId?: string): string {
+  return variantId ? `${threadId}::${variantId}` : threadId
+}
+
+function decodeSelection(value: string): { threadId: string; variantId?: string } {
+  const [threadId, variantId] = value.split('::')
+  return { threadId, variantId: variantId || undefined }
+}
+
+function evidenceLabel(result: ClassificationResult): string {
+  if (result.overrideApplied) return 'Lokal bestätigte Zuordnung'
+  if (result.evidence === 'ambiguous') return 'Mehrdeutige Zuordnung'
+  if (result.evidence === 'weak') return 'Schwache Evidenz'
+  return 'Alternative / Zuordnung'
 }
 
 export function AnalyzeView({ onFeedbackSaved }: { onFeedbackSaved: () => void }) {
@@ -48,16 +64,23 @@ export function AnalyzeView({ onFeedbackSaved }: { onFeedbackSaved: () => void }
 
   const persistFeedback = () => {
     if (!result || !correctionId) return
+    const selection = decodeSelection(correctionId)
+    const predictedVariantId = result.primary.selectedVariant?.id
     const entry: FeedbackEntry = {
       id: createFeedbackId(),
       question: result.input,
       predictedThreadId: result.primary.thread.id,
-      selectedThreadId: correctionId,
-      isCorrect: correctionId === result.primary.thread.id,
+      predictedVariantId,
+      selectedThreadId: selection.threadId,
+      selectedVariantId: selection.variantId,
+      isCorrect:
+        selection.threadId === result.primary.thread.id
+        && selection.variantId === predictedVariantId,
       createdAt: new Date().toISOString(),
     }
     saveFeedback(entry)
-    setFeedbackMessage('Lokal gespeichert.')
+    setResult(classifyQuestion(result.input))
+    setFeedbackMessage('Für diese Eingabe lokal gespeichert.')
     onFeedbackSaved()
     focusInput()
   }
@@ -94,9 +117,9 @@ export function AnalyzeView({ onFeedbackSaved }: { onFeedbackSaved: () => void }
 
       {result && (
         <section className="compact-result" aria-live="polite">
-          <h1>{result.primary.thread.name}</h1>
+          <h1>{getResolvedName(result.primary)}</h1>
           <ol className="numbered-path">
-            {result.primary.thread.steps.map((step, index) => (
+            {getResolvedSteps(result.primary).map((step, index) => (
               <li className="numbered-step" key={step}>
                 <span aria-hidden="true">{index + 1}</span>
                 <strong>{step}</strong>
@@ -104,14 +127,14 @@ export function AnalyzeView({ onFeedbackSaved }: { onFeedbackSaved: () => void }
             ))}
           </ol>
 
-          <details className="compact-details">
-            <summary>Alternative / Zuordnung</summary>
+          <details className={`compact-details evidence-${result.evidence}`}>
+            <summary>{evidenceLabel(result)}</summary>
             <ol className="alternative-lines">
               {result.alternatives.map((alternative) => (
-                <li key={alternative.thread.id}>{alternative.thread.shortName}</li>
+                <li key={alternative.thread.id}>{getResolvedName(alternative)}</li>
               ))}
             </ol>
-            <label htmlFor="correction">Zuordnung korrigieren</label>
+            <label htmlFor="correction">Zuordnung oder Variante korrigieren</label>
             <select
               id="correction"
               value={correctionId}
@@ -119,7 +142,14 @@ export function AnalyzeView({ onFeedbackSaved }: { onFeedbackSaved: () => void }
             >
               <option value="">Faden auswählen</option>
               {threads.map((thread) => (
-                <option value={thread.id} key={thread.id}>{thread.shortName}</option>
+                <optgroup label={thread.shortName} key={thread.id}>
+                  <option value={encodeSelection(thread.id)}>{thread.shortName} · allgemein</option>
+                  {thread.variants?.map((variant) => (
+                    <option value={encodeSelection(thread.id, variant.id)} key={variant.id}>
+                      {variant.name}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
             <button type="button" onClick={persistFeedback} disabled={!correctionId}>Speichern</button>

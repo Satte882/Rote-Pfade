@@ -23,14 +23,19 @@
   "cues": [
     { "text": "funktioniert nicht", "weight": 5 },
     { "text": "geringe nutzung", "weight": 5 },
-    { "text": "kaum genutzt", "weight": 5 },
-    { "text": "liegt hinter dem zeitplan", "weight": 4 },
+    { "text": "kaum genutzt", "weight": 6 },
+    { "text": "liegt hinter dem zeitplan", "weight": 5 },
+    { "text": "hinter dem plan", "weight": 5 },
+    { "text": "projekt verzögert", "weight": 5 },
+    { "text": "deadline verfehlt", "weight": 5 },
     { "text": "schlechte ergebnisse", "weight": 5 },
+    { "text": "fehlerquote steigt", "weight": 5 },
     { "text": "unzufrieden", "weight": 3 },
     { "text": "problem lösen", "weight": 3 },
     { "text": "was tun sie", "weight": 2 },
     { "text": "störung", "weight": 4 },
-    { "text": "ursache", "weight": 3 }
+    { "text": "ursache", "weight": 3 },
+    { "text": "root cause", "weight": 4 }
   ],
   "antiCues": [
     { "text": "wie entscheiden", "weight": 3 },
@@ -41,7 +46,8 @@
     "Der technisch erfolgreiche KI-Pilot wird von den Mitarbeitern kaum genutzt. Was tun Sie?",
     "Ein Transformationsprojekt liegt deutlich hinter dem Zeitplan. Wie reagieren Sie?",
     "Die Fachabteilung ist mit den Ergebnissen der neuen Lösung unzufrieden.",
-    "Das Modell liefert in bestimmten Fällen schlechte Ergebnisse. Wie gehen Sie vor?"
+    "Das Modell liefert in bestimmten Fällen schlechte Ergebnisse. Wie gehen Sie vor?",
+    "Das Projekt ist hinter dem Plan und die Deadline ist gefährdet."
   ],
   "opening": "Ich würde bei {topic} nicht sofort eine Maßnahme setzen, sondern zuerst das Symptom präzisieren und die tatsächlichen Ursachen belegen.",
   "relatedIds": ["stakeholder-change", "wirkung", "risiko-governance"]

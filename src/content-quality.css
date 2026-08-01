@@ -1,0 +1,36 @@
+.compact-details.evidence-ambiguous > summary {
+  color: #e9cc8b;
+}
+
+.compact-details.evidence-weak > summary {
+  color: #f2a9a9;
+}
+
+.variant-list {
+  display: grid;
+  gap: 7px;
+  padding-top: 2px;
+}
+
+.variant-list > span {
+  color: var(--accent);
+  font-size: .6rem;
+  text-transform: uppercase;
+}
+
+.variant-list section {
+  display: grid;
+  gap: 4px;
+  padding: 7px 8px;
+  border-left: 2px solid #35516a;
+  background: var(--panel-soft);
+}
+
+.variant-list section > strong {
+  font-size: .72rem;
+}
+
+.variant-list section ol {
+  margin: 0;
+  padding-left: 17px;
+}

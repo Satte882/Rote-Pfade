@@ -1,8 +1,9 @@
-import type { InterviewThread } from '../types/thread'
+import type { InterviewThread, ThreadVariant } from '../types/thread'
 
 export type TrainingQuestion = {
   prompt: string
   correctThread: InterviewThread
+  correctVariant?: ThreadVariant
   options: InterviewThread[]
 }
 
@@ -14,9 +15,12 @@ export function createTrainingQuestion(
   threads: InterviewThread[],
   previousPrompt?: string,
 ): TrainingQuestion {
-  const candidates = threads.flatMap((thread) =>
-    thread.examples.map((prompt) => ({ prompt, thread })),
-  )
+  const candidates = threads.flatMap((thread) => [
+    ...thread.examples.map((prompt) => ({ prompt, thread, variant: undefined })),
+    ...(thread.variants?.flatMap((variant) =>
+      variant.examples.map((prompt) => ({ prompt, thread, variant })),
+    ) ?? []),
+  ])
   const filtered = candidates.filter((candidate) => candidate.prompt !== previousPrompt)
   const pool = filtered.length > 0 ? filtered : candidates
   const selected = pool[Math.floor(Math.random() * pool.length)]
@@ -33,6 +37,7 @@ export function createTrainingQuestion(
   return {
     prompt: selected.prompt,
     correctThread: selected.thread,
+    correctVariant: selected.variant,
     options: shuffle([selected.thread, ...distractors]),
   }
 }

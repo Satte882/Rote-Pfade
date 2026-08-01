@@ -6,7 +6,7 @@
   "purpose": "Optionen anhand transparenter Kriterien bewerten und eine begründete Empfehlung abgeben.",
   "description": "Passt bei Make-or-Buy, Anbieterauswahl, Fortführung oder Auswahl zwischen mehreren Lösungswegen.",
   "steps": [
-    "Entscheidung und Rahmen klären",
+    "Entscheidung und Rahmen präzisieren",
     "Kriterien und Gewichtung festlegen",
     "Realistische Optionen benennen",
     "Optionen transparent bewerten",
@@ -22,26 +22,146 @@
   "mnemonic": "Kriterien vor Meinung",
   "cues": [
     { "text": "wie entscheiden sie", "weight": 5 },
-    { "text": "make or buy", "weight": 6 },
-    { "text": "anbieter auswählen", "weight": 5 },
+    { "text": "make or buy", "weight": 7 },
+    { "text": "build or buy", "weight": 7 },
+    { "text": "intern entwickeln oder zukaufen", "weight": 7 },
+    { "text": "anbieter auswählen", "weight": 6 },
+    { "text": "tool auswählen", "weight": 6 },
+    { "text": "vendor selection", "weight": 6 },
     { "text": "zwischen zwei lösungen", "weight": 5 },
     { "text": "welche option", "weight": 4 },
-    { "text": "fortgeführt wird", "weight": 4 },
-    { "text": "entscheidung treffen", "weight": 4 },
-    { "text": "auswahl", "weight": 2 },
-    { "text": "empfehlen", "weight": 2 }
+    { "text": "pilot fortführen", "weight": 6 },
+    { "text": "go no go", "weight": 6 },
+    { "text": "entscheidung treffen", "weight": 3 },
+    { "text": "auswahl", "weight": 1 },
+    { "text": "empfehlen", "weight": 1 }
   ],
   "antiCues": [
-    { "text": "unvollständige informationen", "weight": 4 },
-    { "text": "unter unsicherheit", "weight": 6 },
+    { "text": "unvollständige informationen", "weight": 5 },
+    { "text": "unter unsicherheit", "weight": 7 },
+    { "text": "machbarkeit unklar", "weight": 5 },
+    { "text": "noch keine daten", "weight": 5 },
     { "text": "kaum genutzt", "weight": 3 }
   ],
   "examples": [
     "Wie treffen Sie eine Make-or-Buy-Entscheidung für eine KI-Plattform?",
     "Wie wählen Sie zwischen zwei geeigneten Lösungsanbietern?",
     "Wie entscheiden Sie, ob ein Pilot fortgeführt oder beendet wird?",
-    "Welche Lösung würden Sie dem Management empfehlen?"
+    "Welche Lösung würden Sie dem Management empfehlen?",
+    "Sollten wir die Lösung intern entwickeln oder als Produkt zukaufen?"
   ],
   "opening": "Für {topic} definiere ich zuerst die entscheidungsrelevanten Kriterien, bevor ich die Optionen bewerte und eine Empfehlung abgebe.",
-  "relatedIds": ["entscheidung-unsicherheit", "priorisierung", "ki-eignung"]
+  "relatedIds": ["entscheidung-unsicherheit", "priorisierung", "ki-eignung"],
+  "variants": [
+    {
+      "id": "make-or-buy",
+      "name": "Make-or-Buy",
+      "description": "Passt bei Eigenentwicklung, Zukauf oder einer hybriden Lösung.",
+      "steps": [
+        "Entscheidungskriterien festlegen",
+        "Make, Buy und gegebenenfalls Hybrid abgrenzen",
+        "Fakten und Annahmen je Option erheben",
+        "Optionen anhand der Kriterien bewerten",
+        "Empfehlung, Risiken und nächsten Schritt ableiten"
+      ],
+      "stepPrompts": [
+        "Welche strategischen, wirtschaftlichen, technischen und organisatorischen Kriterien zählen?",
+        "Was bedeuten Eigenentwicklung, Zukauf und Hybrid im konkreten Kontext?",
+        "Welche belastbaren Fakten und welche Annahmen liegen je Option vor?",
+        "Wie schneiden die Optionen bei Nutzen, Kosten, Zeit, Risiko und Abhängigkeit ab?",
+        "Welche Option ist vorzuziehen und wie wird die Entscheidung validiert?"
+      ],
+      "cues": [
+        { "text": "make or buy", "weight": 9 },
+        { "text": "build or buy", "weight": 9 },
+        { "text": "intern entwickeln oder zukaufen", "weight": 9 },
+        { "text": "selbst entwickeln oder kaufen", "weight": 8 },
+        { "text": "eigenentwicklung", "weight": 5 },
+        { "text": "zukaufen", "weight": 5 },
+        { "text": "fremdbezug", "weight": 4 }
+      ],
+      "antiCues": [],
+      "examples": [
+        "Make or Buy",
+        "Entwickeln wir die KI-Plattform selbst oder kaufen wir eine Lösung ein?",
+        "Wie bewerten Sie Eigenentwicklung gegenüber einem SaaS-Produkt?"
+      ],
+      "mnemonic": "Kriterien → Make/Buy/Hybrid → Fakten → Bewertung → Empfehlung",
+      "opening": "Bei einer Make-or-Buy-Entscheidung lege ich zuerst die relevanten Kriterien fest und grenze Eigenentwicklung, Zukauf und mögliche Hybridformen sauber ab."
+    },
+    {
+      "id": "anbieterauswahl",
+      "name": "Anbieter- oder Toolauswahl",
+      "description": "Passt bei der strukturierten Auswahl einer Plattform, eines Tools oder eines Lieferanten.",
+      "steps": [
+        "Anforderungen und Muss-Kriterien festlegen",
+        "Anbieter oder Lösungen eingrenzen",
+        "Vergleichbare Evidenz erheben",
+        "Fachlich, technisch und wirtschaftlich bewerten",
+        "Empfehlung und Validierungsschritt festlegen"
+      ],
+      "stepPrompts": [
+        "Welche Anforderungen und Ausschlusskriterien gelten?",
+        "Welche Anbieter kommen realistisch in Betracht?",
+        "Welche Demos, Referenzen, Tests oder Angebote schaffen Vergleichbarkeit?",
+        "Wie schneiden die Anbieter über alle relevanten Dimensionen ab?",
+        "Welcher Anbieter wird empfohlen und was muss vor Vertragsabschluss validiert werden?"
+      ],
+      "cues": [
+        { "text": "anbieter auswählen", "weight": 9 },
+        { "text": "anbieterwahl", "weight": 8 },
+        { "text": "tool auswählen", "weight": 9 },
+        { "text": "software auswählen", "weight": 8 },
+        { "text": "vendor selection", "weight": 9 },
+        { "text": "lieferant wählen", "weight": 8 },
+        { "text": "plattform auswählen", "weight": 8 }
+      ],
+      "antiCues": [],
+      "examples": [
+        "Wie wählen Sie einen Anbieter für eine GenAI-Plattform aus?",
+        "Welche Kriterien verwenden Sie bei einer Toolauswahl?",
+        "Vendor Selection für eine KI-Lösung"
+      ],
+      "mnemonic": "Anforderungen → Shortlist → Evidenz → Bewertung → Validierung",
+      "opening": "Bei einer Anbieterauswahl beginne ich mit Muss-Kriterien und einem einheitlichen Bewertungsrahmen, bevor ich Angebote oder Demos vergleiche."
+    },
+    {
+      "id": "pilotentscheidung",
+      "name": "Pilot fortführen, nachschärfen oder stoppen",
+      "description": "Passt bei einer Go-/No-Go-Entscheidung nach einem Pilot oder MVP.",
+      "steps": [
+        "Ziele und Entscheidungskriterien heranziehen",
+        "Ergebnisse und Evidenz bewerten",
+        "Abweichungen und Ursachen einordnen",
+        "Fortführung, Nachschärfung oder Stopp vergleichen",
+        "Entscheidung und nächste Phase festlegen"
+      ],
+      "stepPrompts": [
+        "Welche Ziele und Gates wurden vor dem Pilot vereinbart?",
+        "Welche Wirkung, Qualität, Machbarkeit und Nutzung sind belegt?",
+        "Warum wurden Ziele erreicht oder verfehlt?",
+        "Welche Option ist angesichts der Evidenz vertretbar?",
+        "Welche Entscheidung folgt mit welchen Verantwortlichkeiten und Terminen?"
+      ],
+      "cues": [
+        { "text": "pilot fortführen", "weight": 9 },
+        { "text": "pilot beenden", "weight": 9 },
+        { "text": "go no go", "weight": 9 },
+        { "text": "weiterführen oder stoppen", "weight": 8 },
+        { "text": "mvp fortführen", "weight": 8 },
+        { "text": "pilotentscheidung", "weight": 8 }
+      ],
+      "antiCues": [
+        { "text": "noch keine daten", "weight": 3 },
+        { "text": "machbarkeit unklar", "weight": 3 }
+      ],
+      "examples": [
+        "Wie entscheiden Sie, ob der Pilot fortgeführt oder beendet wird?",
+        "Go oder No-Go nach einem KI-Pilot",
+        "Der Pilot verfehlt ein Ziel. Nachschärfen oder stoppen?"
+      ],
+      "mnemonic": "Gates → Evidenz → Ursachen → Optionen → Entscheidung",
+      "opening": "Für die Pilotentscheidung gehe ich auf die vorab vereinbarten Ziele und Gates zurück und bewerte die vorhandene Evidenz, bevor ich Fortführung, Nachschärfung oder Stopp empfehle."
+    }
+  ]
 }

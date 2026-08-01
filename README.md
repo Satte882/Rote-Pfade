@@ -12,36 +12,69 @@ Die App unterstützt insbesondere Interviews für Rollen wie:
 - Senior Consultant
 - KI-Transformation und Prozessmanagement
 
-Die Eingabe wird nicht an ein externes LLM oder Backend übertragen. Die Zuordnung erfolgt im Browser über gewichtete Signale, Beispielähnlichkeit und transparente Regeln.
+Die Eingabe wird nicht an ein externes LLM oder Backend übertragen. Die Zuordnung erfolgt im Browser über gewichtete Signale, Wort- und Beispielähnlichkeit sowie transparente Regeln.
 
-## MVP-Funktionen
+## Funktionen
 
 - Hauptfaden und zwei alternative Zuordnungen
-- heuristischer Matchwert mit offengelegten Erkennungssignalen
-- Ziel, Antwortschritte, Leitfragen, Merksatz und möglicher Einstieg
-- 13 konsolidierte rote Fäden
+- fachliche Varianten innerhalb eines Fadens, zum Beispiel Make-or-Buy, Anbieterauswahl oder Prozessanalyse
+- kompakte, nummerierte Antwortschritte
+- Kennzeichnung als klare, mehrdeutige oder schwach belegte Zuordnung
+- 14 konsolidierte rote Fäden
 - anonymisierte, rollenbezogene Interviewbeispiele
 - Trainingsmodus mit lokaler Statistik
-- durchsuchbare Fadenbibliothek
-- lokale Bestätigung und Korrektur von Zuordnungen
-- JSON-Export und -Import der lokalen Lerndaten
+- durchsuchbare Fadenbibliothek einschließlich Varianten
+- lokale Korrektur von Faden und Variante
+- erneute Verwendung einer Korrektur bei derselben normalisierten Eingabe
+- JSON-Export und -Import der lokalen Daten
 - automatisches Deployment über GitHub Pages
 
-## Die 13 Fäden
+Lokale Korrekturen sind deterministische Overrides für identische Eingaben. Es findet kein Modelltraining statt und ähnliche, aber nicht identische Eingaben werden nicht automatisch verändert.
+
+## Die 14 Fäden
 
 1. Vorgehensfrage
-2. Problem- oder Störungsfrage
-3. Entscheidungsfrage
-4. Entscheidungsfrage unter Unsicherheit
-5. KI-Eignungs- oder Use-Case-Frage
-6. Vergleichs- und Abgrenzungsfrage
-7. Skalierungs- und Transformationsfrage
-8. Stakeholder- und Change-Frage
-9. Stakeholder-Konflikt- und Moderationsfrage
-10. Risiko- und Governance-Frage
-11. Wirkungs- und Erfolgsmessungsfrage
-12. Priorisierungs- und Portfoliofrage
-13. Verhaltens- und Erfahrungsfrage (STAR-L)
+2. Strategie- und Zielbildfrage
+3. Problem- oder Störungsfrage
+4. Entscheidungsfrage
+5. Entscheidungsfrage unter Unsicherheit
+6. KI-Eignungs- oder Use-Case-Frage
+7. Vergleichs- und Abgrenzungsfrage
+8. Skalierungs- und Transformationsfrage
+9. Stakeholder- und Change-Frage
+10. Stakeholder-Konflikt- und Moderationsfrage
+11. Risiko- und Governance-Frage
+12. Wirkungs- und Erfolgsmessungsfrage
+13. Priorisierungs- und Portfoliofrage
+14. Verhaltens- und Erfahrungsfrage (STAR-L)
+
+## Fachliche Varianten
+
+Ein Top-Level-Faden kann mehrere konkrete Antwortmuster besitzen. Aktuell sind unter anderem enthalten:
+
+- Entscheidungsfrage
+  - Make-or-Buy
+  - Anbieter- oder Toolauswahl
+  - Pilot fortführen, nachschärfen oder stoppen
+- Vorgehensfrage
+  - strukturierte Prozessanalyse
+  - Projekt- oder Initiativenstart
+  - von der Idee zur umsetzbaren Lösung
+
+Die Variante wird aus eigenen Signalen und Beispielen bestimmt. Gibt es keine ausreichend belastbare Variante, bleibt die allgemeine Schrittfolge des Fadens aktiv.
+
+## Erkennungslogik
+
+Die Klassifikation kombiniert:
+
+1. exakte und normalisierte Cue-Treffer,
+2. tokenbasierte Abdeckung natürlich formulierter Varianten,
+3. Ähnlichkeit zu anonymisierten Beispielen,
+4. positive und negative Signale,
+5. fachliche Varianten innerhalb eines Fadens,
+6. lokal bestätigte Overrides bei identischen normalisierten Eingaben.
+
+Die Ausgabe ist eine nachvollziehbare Heuristik und keine statistisch kalibrierte Wahrscheinlichkeit. Bei geringem Abstand zwischen zwei Kandidaten wird die Zuordnung als mehrdeutig gekennzeichnet. Bei wenig Evidenz wird dies ebenfalls sichtbar gemacht.
 
 ## Lokal starten
 
@@ -57,9 +90,11 @@ npm run test:run
 npm run build
 ```
 
-## GitHub Pages
+Die Regressionstests enthalten mehr als 50 kurze und vollständige Intervieweingaben aus Strategie, KI, Digitalisierung, Produkt-, Prozess- und Transformationskontexten. Zusätzlich werden Varianten, schwache Evidenz und lokale Overrides geprüft.
 
-Der Workflow `.github/workflows/deploy.yml` baut und veröffentlicht die Anwendung bei jedem Push auf `main`.
+Pull Requests und Feature-Branches werden über `.github/workflows/validate.yml` getestet und gebaut. Pushes auf `main` werden über `.github/workflows/deploy.yml` getestet, gebaut und auf GitHub Pages veröffentlicht.
+
+## GitHub Pages
 
 Einmalig in GitHub konfigurieren:
 
@@ -83,10 +118,11 @@ Danach ist die Anwendung voraussichtlich unter folgender URL erreichbar:
 Neue Fäden werden als einzelne JSON-Dateien unter `src/data/threads/` ergänzt. Jeder Faden enthält unter anderem:
 
 - Zweck und Beschreibung
-- Antwortschritte und Leitfragen
+- allgemeine Antwortschritte und Leitfragen
 - positive und negative Erkennungssignale
 - anonymisierte Beispiele
 - verwandte Fäden
 - Merksatz und möglichen Einstieg
+- optional fachliche Varianten mit eigenen Schritten, Signalen und Beispielen
 
-Die Anwendung lädt alle JSON-Dateien in diesem Ordner automatisch beim Build.
+Die Anwendung lädt alle JSON-Dateien in diesem Ordner automatisch beim Build. Ein neuer Faden muss zusätzlich in `THREAD_ORDER` in `src/lib/classifier.ts` einsortiert und durch Regressionstests abgesichert werden.

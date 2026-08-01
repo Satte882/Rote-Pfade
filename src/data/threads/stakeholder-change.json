@@ -4,7 +4,7 @@
   "shortName": "Stakeholder / Change",
   "category": "Menschen & Organisation",
   "purpose": "Betroffene früh beteiligen, befähigen und die Veränderung organisatorisch verankern.",
-  "description": "Passt bei Akzeptanz, Widerstand, Mitarbeiterbeteiligung oder der Einführung neuer Arbeitsweisen.",
+  "description": "Passt bei Akzeptanz, Widerstand, Adoption, Mitarbeiterbeteiligung oder der Einführung neuer Arbeitsweisen.",
   "steps": [
     "Betroffene und Interessen verstehen",
     "Schlüsselpersonen früh beteiligen",
@@ -19,28 +19,35 @@
     "Welche Schulung, Unterstützung und Führung sind notwendig?",
     "Wie wird die neue Arbeitsweise dauerhaft in Rollen, Prozessen und Zielen verankert?"
   ],
-  "mnemonic": "Change ist keine Kommunikationskampagne",
+  "mnemonic": "Beteiligen → Nutzen zeigen → befähigen → verankern",
   "cues": [
-    { "text": "mitarbeiter mitnehmen", "weight": 7 },
-    { "text": "widerstand", "weight": 6 },
-    { "text": "akzeptanz", "weight": 6 },
+    { "text": "mitarbeiter mitnehmen", "weight": 8 },
+    { "text": "widerstand", "weight": 7 },
+    { "text": "akzeptanz", "weight": 7 },
     { "text": "neue arbeitsweisen", "weight": 5 },
     { "text": "change", "weight": 4 },
+    { "text": "change management", "weight": 7 },
     { "text": "beteiligung", "weight": 3 },
     { "text": "schulung", "weight": 3 },
-    { "text": "adoption", "weight": 5 },
-    { "text": "nutzung erhöhen", "weight": 3 }
+    { "text": "adoption", "weight": 7 },
+    { "text": "adoption nach rollout", "weight": 9 },
+    { "text": "nutzung nach rollout erhöhen", "weight": 9 },
+    { "text": "nutzungsquote erhöhen", "weight": 7 },
+    { "text": "nutzung erhöhen", "weight": 5 }
   ],
   "antiCues": [
     { "text": "beide seiten", "weight": 2 },
     { "text": "blockiert wegen", "weight": 3 },
-    { "text": "entscheidung herbeiführen", "weight": 3 }
+    { "text": "entscheidung herbeiführen", "weight": 3 },
+    { "text": "ursache analysieren", "weight": 2 },
+    { "text": "root cause", "weight": 3 }
   ],
   "examples": [
     "Wie nehmen Sie Mitarbeiter bei der Einführung einer KI-Lösung mit?",
     "Wie gehen Sie mit Widerstand gegen neue digitale Arbeitsweisen um?",
     "Wie schaffen Sie nachhaltige Akzeptanz für einen KI-Assistenten?",
-    "Was tun Sie, damit ein erfolgreicher Pilot im Alltag tatsächlich genutzt wird?"
+    "Was tun Sie, damit ein erfolgreicher Pilot im Alltag tatsächlich genutzt wird?",
+    "Wie erhöhen Sie die Adoption nach dem Rollout?"
   ],
   "opening": "Bei {topic} identifiziere ich zuerst die betroffenen Gruppen und ihre konkreten Interessen, bevor ich Beteiligung, Befähigung und Verankerung plane.",
   "relatedIds": ["stakeholder-konflikt", "problem-stoerung", "skalierung"]

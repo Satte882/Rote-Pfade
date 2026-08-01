@@ -9,39 +9,43 @@
     "Problem und Scope klären",
     "Nutzen und Prozessbezug bewerten",
     "Daten und Machbarkeit prüfen",
-    "Organisation und Risiken bewerten",
+    "Organisation, Governance und Regulierung bewerten",
     "KI, Alternative oder Stopp empfehlen"
   ],
   "stepPrompts": [
     "Welches konkrete Problem soll bei {topic} gelöst werden und was gehört nicht zum Scope?",
     "Welcher messbare Nutzen entsteht im Prozess?",
     "Sind Daten, Qualität, Integration und technische Machbarkeit ausreichend?",
-    "Welche organisatorischen Voraussetzungen, Risiken und Governance-Fragen bestehen?",
+    "Welche organisatorischen Voraussetzungen sowie Anforderungen aus Datenschutz, EU AI Act, Informationssicherheit und Branche bestehen?",
     "Ist KI die beste Lösung, reicht eine einfachere Lösung oder sollte der Use Case stoppen?"
   ],
-  "mnemonic": "Nicht: Kann KI das? – sondern: Sollten wir es so lösen?",
+  "mnemonic": "Problem → Nutzen → Machbarkeit → Verantwortung → Entscheidung",
   "cues": [
-    { "text": "geeigneter ki use case", "weight": 7 },
-    { "text": "ki use case bewerten", "weight": 6 },
-    { "text": "wann ist ki sinnvoll", "weight": 6 },
+    { "text": "geeigneter ki use case", "weight": 8 },
+    { "text": "ki use case bewerten", "weight": 7 },
+    { "text": "use case assessment", "weight": 7 },
+    { "text": "wann ist ki sinnvoll", "weight": 7 },
     { "text": "ki idee", "weight": 4 },
-    { "text": "sollten wir ki", "weight": 5 },
+    { "text": "sollten wir ki", "weight": 6 },
     { "text": "datenverfügbarkeit", "weight": 3 },
     { "text": "technische machbarkeit", "weight": 3 },
     { "text": "use case", "weight": 3 },
-    { "text": "anwendungsfall", "weight": 3 }
+    { "text": "anwendungsfall", "weight": 3 },
+    { "text": "vor dem pilot bewerten", "weight": 5 }
   ],
   "antiCues": [
     { "text": "skalieren", "weight": 3 },
     { "text": "geringe nutzung", "weight": 3 },
-    { "text": "erzählen sie von", "weight": 4 }
+    { "text": "erzählen sie von", "weight": 4 },
+    { "text": "strategie entwickeln", "weight": 4 }
   ],
   "examples": [
     "Woran erkennen Sie einen geeigneten KI-Use-Case?",
     "Wie bewerten Sie, ob eine KI-Idee umgesetzt werden sollte?",
     "Wann ist KI für einen Prozess die richtige Lösung?",
-    "Wie prüfen Sie einen neuen GenAI-Anwendungsfall vor dem Pilot?"
+    "Wie prüfen Sie einen neuen GenAI-Anwendungsfall vor dem Pilot?",
+    "Wie bewerten Sie einen KI-gestützten CV-Screener vor dem Hintergrund von Nutzen, Daten und Regulierung?"
   ],
-  "opening": "Bei {topic} starte ich nicht mit der Technologie, sondern mit dem fachlichen Problem, dem Prozess und dem erwarteten Nutzen.",
-  "relatedIds": ["vorgehen", "entscheidung", "risiko-governance"]
+  "opening": "Bei {topic} starte ich nicht mit der Technologie, sondern mit dem fachlichen Problem, dem Prozess und dem erwarteten Nutzen. Danach prüfe ich Machbarkeit und verantwortbare Nutzung.",
+  "relatedIds": ["vorgehen", "entscheidung", "risiko-governance", "strategie-zielbild"]
 }

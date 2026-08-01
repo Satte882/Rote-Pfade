@@ -6,33 +6,37 @@
   "purpose": "Einen validierten Pilot kontrolliert in einen stabilen, betreibbaren und skalierbaren Produktivbetrieb überführen.",
   "description": "Passt bei Rollout, Industrialisierung, Einführung in weitere Bereiche oder dem Weg vom MVP zum Betrieb.",
   "steps": [
-    "Fachlichen Nutzen validieren",
+    "Nutzen und Skalierungsreife validieren – sonst nachschärfen oder stoppen",
     "Lösung und Prozess stabilisieren",
     "Betrieb, Integration und Governance industrialisieren",
     "Rollout kontrolliert skalieren",
     "Wirkung, Qualität und Kosten optimieren"
   ],
   "stepPrompts": [
-    "Ist der Nutzen von {topic} belastbar nachgewiesen?",
+    "Ist der Nutzen von {topic} belastbar nachgewiesen und ist Skalierung gerechtfertigt? Wenn nicht: zurück in den Pilot, nachschärfen oder stoppen.",
     "Funktionieren Lösung und Prozess zuverlässig und reproduzierbar?",
     "Sind Betrieb, Integration, Security, Support und Governance geklärt?",
     "Wie erfolgt der schrittweise Rollout auf Nutzer oder Bereiche?",
     "Wie werden Wirkung, Qualität, Adoption und Kosten dauerhaft überwacht?"
   ],
-  "mnemonic": "Ein erfolgreicher Pilot ist noch kein skalierbares Produkt",
+  "mnemonic": "Erst Gate, dann Produktreife, dann Rollout",
   "cues": [
-    { "text": "skalieren", "weight": 6 },
+    { "text": "skalieren", "weight": 7 },
+    { "text": "scale up", "weight": 7 },
     { "text": "erfolgreichen piloten", "weight": 4 },
     { "text": "in die organisation", "weight": 5 },
-    { "text": "mvp zum produktiven betrieb", "weight": 7 },
-    { "text": "unternehmensweit einführen", "weight": 6 },
-    { "text": "rollout", "weight": 5 },
-    { "text": "industrialisieren", "weight": 6 },
-    { "text": "in die breite", "weight": 5 },
-    { "text": "produktivbetrieb", "weight": 4 }
+    { "text": "mvp zum produktiven betrieb", "weight": 8 },
+    { "text": "unternehmensweit einführen", "weight": 7 },
+    { "text": "rollout", "weight": 6 },
+    { "text": "industrialisieren", "weight": 7 },
+    { "text": "in die breite", "weight": 6 },
+    { "text": "produktivbetrieb", "weight": 5 },
+    { "text": "skalierungsreife", "weight": 7 }
   ],
   "antiCues": [
-    { "text": "kaum genutzt", "weight": 2 },
+    { "text": "kaum genutzt", "weight": 3 },
+    { "text": "akzeptanz erhöhen", "weight": 3 },
+    { "text": "widerstand", "weight": 3 },
     { "text": "ob ki sinnvoll", "weight": 3 },
     { "text": "unterschied zwischen", "weight": 4 }
   ],
@@ -40,8 +44,9 @@
     "Wie skalieren Sie einen erfolgreichen KI-Piloten auf weitere Bereiche?",
     "Wie kommen Sie vom MVP in einen stabilen produktiven Betrieb?",
     "Wie führen Sie eine KI-Lösung unternehmensweit ein?",
-    "Was muss vor einem breiten Rollout geklärt sein?"
+    "Was muss vor einem breiten Rollout geklärt sein?",
+    "Wie gehen Sie vor, wenn der Pilotnutzen für eine Skalierung noch nicht belastbar ist?"
   ],
-  "opening": "Für {topic} trenne ich klar zwischen validiertem Nutzen, stabiler Lösung, produktionsreifem Betrieb und dem eigentlichen Rollout.",
-  "relatedIds": ["stakeholder-change", "wirkung", "risiko-governance"]
+  "opening": "Für {topic} prüfe ich zuerst, ob Nutzen und Skalierungsreife ein belastbares Gate erfüllen. Ohne diesen Nachweis wird nachgeschärft, zurück in den Pilot gegangen oder gestoppt.",
+  "relatedIds": ["stakeholder-change", "wirkung", "risiko-governance", "strategie-zielbild"]
 }
