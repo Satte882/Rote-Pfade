@@ -1,0 +1,46 @@
+{
+  "id": "vergleich",
+  "name": "Vergleichs- und Abgrenzungsfrage",
+  "shortName": "Vergleich / Abgrenzung",
+  "category": "Einordnung",
+  "purpose": "Begriffe oder Ansätze im gemeinsamen Rahmen präzise unterscheiden und passend einordnen.",
+  "description": "Passt bei Unterschiedsfragen, Methodenauswahl oder Abgrenzungen wie Pilot versus MVP oder agil versus klassisch.",
+  "steps": [
+    "Gemeinsamen Rahmen herstellen",
+    "Zentrale Unterschiede benennen",
+    "Stärken und Grenzen einordnen",
+    "Einsatzgebiete zuordnen",
+    "Kontextabhängige Empfehlung geben"
+  ],
+  "stepPrompts": [
+    "Was verbindet die verglichenen Ansätze bei {topic}?",
+    "Worin unterscheiden sie sich bei Ziel, Ebene oder Vorgehen?",
+    "Welche Stärken und Grenzen haben sie?",
+    "Für welchen Einsatzkontext passt welcher Ansatz?",
+    "Welche Einordnung ist für die konkrete Situation relevant?"
+  ],
+  "mnemonic": "Erst verbinden, dann trennen",
+  "cues": [
+    { "text": "was ist der unterschied", "weight": 7 },
+    { "text": "unterschied zwischen", "weight": 7 },
+    { "text": "wie grenzen sie", "weight": 6 },
+    { "text": "oder wann", "weight": 3 },
+    { "text": "agil oder klassisch", "weight": 6 },
+    { "text": "pilot mvp proof of concept", "weight": 6 },
+    { "text": "vergleich", "weight": 4 },
+    { "text": "abgrenzung", "weight": 5 }
+  ],
+  "antiCues": [
+    { "text": "wie entscheiden sie zwischen", "weight": 2 },
+    { "text": "problem lösen", "weight": 3 },
+    { "text": "mitarbeiter mitnehmen", "weight": 3 }
+  ],
+  "examples": [
+    "Was ist der Unterschied zwischen Proof of Concept, Pilot und MVP?",
+    "Wie grenzen Sie Value-Stream-Analyse und Prozessanalyse voneinander ab?",
+    "Agil oder klassisch: Wann setzen Sie welchen Ansatz ein?",
+    "Was unterscheidet einen AI Product Owner von einem AI Business Architect?"
+  ],
+  "opening": "Beide Ansätze haben bei {topic} einen gemeinsamen Bezug, unterscheiden sich aber vor allem in Ziel, Betrachtungsebene und Einsatzkontext.",
+  "relatedIds": ["entscheidung", "vorgehen"]
+}

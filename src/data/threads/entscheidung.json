@@ -1,0 +1,47 @@
+{
+  "id": "entscheidung",
+  "name": "Entscheidungsfrage",
+  "shortName": "Entscheidung",
+  "category": "Entscheidung",
+  "purpose": "Optionen anhand transparenter Kriterien bewerten und eine begründete Empfehlung abgeben.",
+  "description": "Passt bei Make-or-Buy, Anbieterauswahl, Fortführung oder Auswahl zwischen mehreren Lösungswegen.",
+  "steps": [
+    "Entscheidung und Rahmen klären",
+    "Kriterien und Gewichtung festlegen",
+    "Realistische Optionen benennen",
+    "Optionen transparent bewerten",
+    "Empfehlung und Konsequenzen ableiten"
+  ],
+  "stepPrompts": [
+    "Welche konkrete Entscheidung ist bei {topic} zu treffen?",
+    "Welche Kriterien wie Nutzen, Kosten, Risiko oder Integrationsfähigkeit sind entscheidend?",
+    "Welche realistischen Optionen stehen zur Wahl?",
+    "Wie schneiden die Optionen anhand der Kriterien ab?",
+    "Welche Option empfehle ich und welche Konsequenzen hat sie?"
+  ],
+  "mnemonic": "Kriterien vor Meinung",
+  "cues": [
+    { "text": "wie entscheiden sie", "weight": 5 },
+    { "text": "make or buy", "weight": 6 },
+    { "text": "anbieter auswählen", "weight": 5 },
+    { "text": "zwischen zwei lösungen", "weight": 5 },
+    { "text": "welche option", "weight": 4 },
+    { "text": "fortgeführt wird", "weight": 4 },
+    { "text": "entscheidung treffen", "weight": 4 },
+    { "text": "auswahl", "weight": 2 },
+    { "text": "empfehlen", "weight": 2 }
+  ],
+  "antiCues": [
+    { "text": "unvollständige informationen", "weight": 4 },
+    { "text": "unter unsicherheit", "weight": 6 },
+    { "text": "kaum genutzt", "weight": 3 }
+  ],
+  "examples": [
+    "Wie treffen Sie eine Make-or-Buy-Entscheidung für eine KI-Plattform?",
+    "Wie wählen Sie zwischen zwei geeigneten Lösungsanbietern?",
+    "Wie entscheiden Sie, ob ein Pilot fortgeführt oder beendet wird?",
+    "Welche Lösung würden Sie dem Management empfehlen?"
+  ],
+  "opening": "Für {topic} definiere ich zuerst die entscheidungsrelevanten Kriterien, bevor ich die Optionen bewerte und eine Empfehlung abgebe.",
+  "relatedIds": ["entscheidung-unsicherheit", "priorisierung", "ki-eignung"]
+}

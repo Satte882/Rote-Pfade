@@ -1,0 +1,47 @@
+{
+  "id": "wirkung",
+  "name": "Wirkungs- und Erfolgsmessungsfrage",
+  "shortName": "Wirkung / Erfolg",
+  "category": "Steuerung",
+  "purpose": "Fachliche Ziele in messbare Wirkung übersetzen und daraus eine konkrete Fortführungsentscheidung ableiten.",
+  "description": "Passt bei Business Value, KPIs, Pilotbewertung, Baseline, Zielwert und Erfolgsnachweis.",
+  "steps": [
+    "Fachliches Ziel präzisieren",
+    "Geeignete Kennzahl definieren",
+    "Baseline und Messbedingungen festlegen",
+    "Zielwert und Zeitraum vereinbaren",
+    "Messen und Konsequenz ableiten"
+  ],
+  "stepPrompts": [
+    "Welches fachliche Ziel soll {topic} erreichen?",
+    "Welche Kennzahl bildet dieses Ziel wirklich ab?",
+    "Wie sieht der Ausgangswert unter vergleichbaren Bedingungen aus?",
+    "Welcher Zielwert ist bis wann realistisch?",
+    "Welche Entscheidung folgt bei Zielerreichung, Teilwirkung oder Verfehlung?"
+  ],
+  "mnemonic": "Keine Wirkungsmessung ohne Baseline",
+  "cues": [
+    { "text": "erfolg messen", "weight": 7 },
+    { "text": "wie messen sie", "weight": 5 },
+    { "text": "business value", "weight": 6 },
+    { "text": "welche kpis", "weight": 6 },
+    { "text": "baseline", "weight": 6 },
+    { "text": "zielwert", "weight": 5 },
+    { "text": "wirkung nachweisen", "weight": 7 },
+    { "text": "erfolgreich war", "weight": 5 },
+    { "text": "pilot erfolgreich", "weight": 4 }
+  ],
+  "antiCues": [
+    { "text": "priorisieren", "weight": 3 },
+    { "text": "risiken", "weight": 2 },
+    { "text": "unterschied zwischen", "weight": 4 }
+  ],
+  "examples": [
+    "Wie messen Sie den Erfolg eines KI-Piloten?",
+    "Wie weisen Sie den Business Value einer Prozessautomatisierung nach?",
+    "Welche KPIs würden Sie für einen internen KI-Assistenten verwenden?",
+    "Woran erkennen Sie, ob ein Use Case skaliert oder beendet werden sollte?"
+  ],
+  "opening": "Für {topic} übersetze ich zuerst das fachliche Ziel in eine belastbare Kennzahl und bestimme die Baseline, bevor ein Zielwert vereinbart wird.",
+  "relatedIds": ["skalierung", "priorisierung", "problem-stoerung"]
+}

@@ -1,0 +1,85 @@
+import type { ExportPayload, FeedbackEntry, TrainingStats } from '../types/thread'
+
+const FEEDBACK_KEY = 'rote-pfade.feedback.v1'
+const TRAINING_KEY = 'rote-pfade.training.v1'
+
+const emptyStats = (): TrainingStats => ({ answered: 0, correct: 0, byThread: {} })
+
+function safeParse<T>(value: string | null, fallback: T): T {
+  if (!value) return fallback
+  try {
+    return JSON.parse(value) as T
+  } catch {
+    return fallback
+  }
+}
+
+export function loadFeedback(): FeedbackEntry[] {
+  return safeParse<FeedbackEntry[]>(localStorage.getItem(FEEDBACK_KEY), [])
+}
+
+export function saveFeedback(entry: FeedbackEntry): FeedbackEntry[] {
+  const next = [entry, ...loadFeedback()].slice(0, 1000)
+  localStorage.setItem(FEEDBACK_KEY, JSON.stringify(next))
+  return next
+}
+
+export function loadTrainingStats(): TrainingStats {
+  return safeParse<TrainingStats>(localStorage.getItem(TRAINING_KEY), emptyStats())
+}
+
+export function saveTrainingAnswer(threadId: string, correct: boolean): TrainingStats {
+  const current = loadTrainingStats()
+  const threadStats = current.byThread[threadId] ?? { answered: 0, correct: 0 }
+  const next: TrainingStats = {
+    answered: current.answered + 1,
+    correct: current.correct + (correct ? 1 : 0),
+    byThread: {
+      ...current.byThread,
+      [threadId]: {
+        answered: threadStats.answered + 1,
+        correct: threadStats.correct + (correct ? 1 : 0),
+      },
+    },
+  }
+  localStorage.setItem(TRAINING_KEY, JSON.stringify(next))
+  return next
+}
+
+export function createExportPayload(): ExportPayload {
+  return {
+    schemaVersion: 1,
+    exportedAt: new Date().toISOString(),
+    feedback: loadFeedback(),
+    trainingStats: loadTrainingStats(),
+  }
+}
+
+export function downloadExport(): void {
+  const payload = createExportPayload()
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = `rote-pfade-daten-${new Date().toISOString().slice(0, 10)}.json`
+  anchor.click()
+  URL.revokeObjectURL(url)
+}
+
+export async function importExport(file: File): Promise<ExportPayload> {
+  const content = await file.text()
+  const parsed = JSON.parse(content) as Partial<ExportPayload>
+
+  if (parsed.schemaVersion !== 1 || !Array.isArray(parsed.feedback) || !parsed.trainingStats) {
+    throw new Error('Die Datei hat kein gültiges Rote-Pfade-Exportformat.')
+  }
+
+  localStorage.setItem(FEEDBACK_KEY, JSON.stringify(parsed.feedback))
+  localStorage.setItem(TRAINING_KEY, JSON.stringify(parsed.trainingStats))
+  return parsed as ExportPayload
+}
+
+export function clearLocalData(): void {
+  localStorage.removeItem(FEEDBACK_KEY)
+  localStorage.removeItem(TRAINING_KEY)
+}

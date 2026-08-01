@@ -1,0 +1,48 @@
+{
+  "id": "star-l",
+  "name": "Verhaltens- und Erfahrungsfrage (STAR-L)",
+  "shortName": "Erfahrung / STAR-L",
+  "category": "Erfahrung",
+  "purpose": "An einem konkreten Beispiel den eigenen Verantwortungsbeitrag, das Ergebnis und das Learning sichtbar machen.",
+  "description": "Passt bei Erfolgen, Fehlern, Konflikten, schwierigen Projekten und Fragen nach konkretem Verhalten in der Vergangenheit.",
+  "steps": [
+    "Situation knapp beschreiben",
+    "Eigene Aufgabe und Verantwortung klären",
+    "Konkrete eigene Handlungen darstellen",
+    "Ergebnis mit Wirkung belegen",
+    "Learning und Transfer benennen"
+  ],
+  "stepPrompts": [
+    "Was war die konkrete Ausgangslage bei {topic}?",
+    "Wofür war ich persönlich verantwortlich?",
+    "Was habe ich selbst konkret getan und entschieden?",
+    "Welches Ergebnis wurde erreicht und wie lässt es sich belegen?",
+    "Was würde ich wieder so machen oder künftig verändern?"
+  ],
+  "mnemonic": "Nicht das gesamte Projekt erzählen – den eigenen Beitrag zeigen",
+  "cues": [
+    { "text": "erzählen sie von", "weight": 7 },
+    { "text": "beschreiben sie eine situation", "weight": 7 },
+    { "text": "schwieriges projekt", "weight": 5 },
+    { "text": "größter fehler", "weight": 6 },
+    { "text": "stolz sind", "weight": 5 },
+    { "text": "konkret erlebt", "weight": 5 },
+    { "text": "beispiel aus ihrer erfahrung", "weight": 7 },
+    { "text": "wie haben sie", "weight": 4 },
+    { "text": "konflikt den sie gelöst", "weight": 6 },
+    { "text": "was haben sie gelernt", "weight": 5 }
+  ],
+  "antiCues": [
+    { "text": "wie würden sie", "weight": 5 },
+    { "text": "was ist der unterschied", "weight": 4 },
+    { "text": "wie priorisieren", "weight": 4 }
+  ],
+  "examples": [
+    "Erzählen Sie von einem schwierigen Projekt und Ihrem konkreten Beitrag.",
+    "Beschreiben Sie einen Konflikt, den Sie erfolgreich gelöst haben.",
+    "Was war ein Fehler in einem Projekt und was haben Sie daraus gelernt?",
+    "Nennen Sie ein Ergebnis, auf das Sie besonders stolz sind."
+  ],
+  "opening": "Ich wähle für {topic} ein konkretes Beispiel und beschreibe knapp die Situation und meine Verantwortung, bevor ich meine Handlungen und das Ergebnis darstelle.",
+  "relatedIds": ["stakeholder-konflikt", "problem-stoerung"]
+}

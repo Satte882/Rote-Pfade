@@ -1,0 +1,47 @@
+{
+  "id": "skalierung",
+  "name": "Skalierungs- und Transformationsfrage",
+  "shortName": "Skalierung / Transformation",
+  "category": "Transformation",
+  "purpose": "Einen validierten Pilot kontrolliert in einen stabilen, betreibbaren und skalierbaren Produktivbetrieb überführen.",
+  "description": "Passt bei Rollout, Industrialisierung, Einführung in weitere Bereiche oder dem Weg vom MVP zum Betrieb.",
+  "steps": [
+    "Fachlichen Nutzen validieren",
+    "Lösung und Prozess stabilisieren",
+    "Betrieb, Integration und Governance industrialisieren",
+    "Rollout kontrolliert skalieren",
+    "Wirkung, Qualität und Kosten optimieren"
+  ],
+  "stepPrompts": [
+    "Ist der Nutzen von {topic} belastbar nachgewiesen?",
+    "Funktionieren Lösung und Prozess zuverlässig und reproduzierbar?",
+    "Sind Betrieb, Integration, Security, Support und Governance geklärt?",
+    "Wie erfolgt der schrittweise Rollout auf Nutzer oder Bereiche?",
+    "Wie werden Wirkung, Qualität, Adoption und Kosten dauerhaft überwacht?"
+  ],
+  "mnemonic": "Ein erfolgreicher Pilot ist noch kein skalierbares Produkt",
+  "cues": [
+    { "text": "skalieren", "weight": 6 },
+    { "text": "erfolgreichen piloten", "weight": 4 },
+    { "text": "in die organisation", "weight": 5 },
+    { "text": "mvp zum produktiven betrieb", "weight": 7 },
+    { "text": "unternehmensweit einführen", "weight": 6 },
+    { "text": "rollout", "weight": 5 },
+    { "text": "industrialisieren", "weight": 6 },
+    { "text": "in die breite", "weight": 5 },
+    { "text": "produktivbetrieb", "weight": 4 }
+  ],
+  "antiCues": [
+    { "text": "kaum genutzt", "weight": 2 },
+    { "text": "ob ki sinnvoll", "weight": 3 },
+    { "text": "unterschied zwischen", "weight": 4 }
+  ],
+  "examples": [
+    "Wie skalieren Sie einen erfolgreichen KI-Piloten auf weitere Bereiche?",
+    "Wie kommen Sie vom MVP in einen stabilen produktiven Betrieb?",
+    "Wie führen Sie eine KI-Lösung unternehmensweit ein?",
+    "Was muss vor einem breiten Rollout geklärt sein?"
+  ],
+  "opening": "Für {topic} trenne ich klar zwischen validiertem Nutzen, stabiler Lösung, produktionsreifem Betrieb und dem eigentlichen Rollout.",
+  "relatedIds": ["stakeholder-change", "wirkung", "risiko-governance"]
+}

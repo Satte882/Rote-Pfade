@@ -1,0 +1,47 @@
+{
+  "id": "ki-eignung",
+  "name": "KI-Eignungs- oder Use-Case-Frage",
+  "shortName": "KI-Eignung / Use Case",
+  "category": "KI & Produkt",
+  "purpose": "Prüfen, ob ein relevantes Problem mit KI sinnvoll, machbar und verantwortbar gelöst werden sollte.",
+  "description": "Passt bei der Bewertung einer KI-Idee oder der Frage, ob KI gegenüber einer einfacheren Lösung gerechtfertigt ist.",
+  "steps": [
+    "Problem und Scope klären",
+    "Nutzen und Prozessbezug bewerten",
+    "Daten und Machbarkeit prüfen",
+    "Organisation und Risiken bewerten",
+    "KI, Alternative oder Stopp empfehlen"
+  ],
+  "stepPrompts": [
+    "Welches konkrete Problem soll bei {topic} gelöst werden und was gehört nicht zum Scope?",
+    "Welcher messbare Nutzen entsteht im Prozess?",
+    "Sind Daten, Qualität, Integration und technische Machbarkeit ausreichend?",
+    "Welche organisatorischen Voraussetzungen, Risiken und Governance-Fragen bestehen?",
+    "Ist KI die beste Lösung, reicht eine einfachere Lösung oder sollte der Use Case stoppen?"
+  ],
+  "mnemonic": "Nicht: Kann KI das? – sondern: Sollten wir es so lösen?",
+  "cues": [
+    { "text": "geeigneter ki use case", "weight": 7 },
+    { "text": "ki use case bewerten", "weight": 6 },
+    { "text": "wann ist ki sinnvoll", "weight": 6 },
+    { "text": "ki idee", "weight": 4 },
+    { "text": "sollten wir ki", "weight": 5 },
+    { "text": "datenverfügbarkeit", "weight": 3 },
+    { "text": "technische machbarkeit", "weight": 3 },
+    { "text": "use case", "weight": 3 },
+    { "text": "anwendungsfall", "weight": 3 }
+  ],
+  "antiCues": [
+    { "text": "skalieren", "weight": 3 },
+    { "text": "geringe nutzung", "weight": 3 },
+    { "text": "erzählen sie von", "weight": 4 }
+  ],
+  "examples": [
+    "Woran erkennen Sie einen geeigneten KI-Use-Case?",
+    "Wie bewerten Sie, ob eine KI-Idee umgesetzt werden sollte?",
+    "Wann ist KI für einen Prozess die richtige Lösung?",
+    "Wie prüfen Sie einen neuen GenAI-Anwendungsfall vor dem Pilot?"
+  ],
+  "opening": "Bei {topic} starte ich nicht mit der Technologie, sondern mit dem fachlichen Problem, dem Prozess und dem erwarteten Nutzen.",
+  "relatedIds": ["vorgehen", "entscheidung", "risiko-governance"]
+}
