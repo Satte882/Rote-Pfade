@@ -1,0 +1,50 @@
+{
+  "id": "strategie-zielbild",
+  "name": "Strategie- und Zielbildfrage",
+  "shortName": "Strategie / Zielbild",
+  "category": "Strategie",
+  "purpose": "Aus strategischem Kontext und Ausgangslage ein priorisiertes Zielbild mit Governance, Roadmap und messbarer Umsetzung ableiten.",
+  "description": "Passt bei KI- oder Digitalstrategie, Zielbild, strategischen Handlungsfeldern, Roadmap oder Target Operating Model.",
+  "steps": [
+    "Ausgangslage und strategischen Kontext verstehen",
+    "Ambition und Zielbild festlegen",
+    "Handlungsfelder und benötigte Fähigkeiten ableiten",
+    "Initiativen priorisieren und Governance definieren",
+    "Roadmap, Messgrößen und Umsetzung festlegen"
+  ],
+  "stepPrompts": [
+    "Welche Unternehmensziele, Marktbedingungen und internen Ausgangslagen prägen {topic}?",
+    "Welche Ambition und welches konkrete Zielbild sollen erreicht werden?",
+    "Welche Prozesse, Fähigkeiten, Daten, Technologien und organisatorischen Veränderungen sind dafür notwendig?",
+    "Welche Initiativen haben Priorität und wie werden Entscheidungen und Verantwortlichkeiten organisiert?",
+    "Welche Roadmap, Meilensteine und Messgrößen führen kontrolliert in die Umsetzung?"
+  ],
+  "mnemonic": "Kontext → Zielbild → Fähigkeiten → Prioritäten → Roadmap",
+  "cues": [
+    { "text": "ki strategie", "weight": 9 },
+    { "text": "digitalstrategie", "weight": 9 },
+    { "text": "strategie entwickeln", "weight": 8 },
+    { "text": "strategisches zielbild", "weight": 9 },
+    { "text": "zielbild entwickeln", "weight": 8 },
+    { "text": "ki roadmap", "weight": 9 },
+    { "text": "roadmap aufbauen", "weight": 8 },
+    { "text": "transformationsstrategie", "weight": 8 },
+    { "text": "target operating model", "weight": 8 },
+    { "text": "strategische handlungsfelder", "weight": 7 },
+    { "text": "vision und mission", "weight": 6 }
+  ],
+  "antiCues": [
+    { "text": "pilot skalieren", "weight": 4 },
+    { "text": "problem lösen", "weight": 3 },
+    { "text": "erzählen sie von", "weight": 4 }
+  ],
+  "examples": [
+    "Wie entwickeln Sie eine KI-Strategie für einen Mittelständler?",
+    "Wie leiten Sie aus der Unternehmensstrategie ein digitales Zielbild ab?",
+    "Wie bauen Sie eine KI-Roadmap auf?",
+    "Wie entwickeln Sie ein Target Operating Model für eine KI-Organisation?",
+    "Wie priorisieren Sie strategische Handlungsfelder einer Transformation?"
+  ],
+  "opening": "Bei {topic} starte ich mit Unternehmenszielen, Markt- und Ausgangslage. Daraus leite ich Ambition, Zielbild, priorisierte Handlungsfelder und eine umsetzbare Roadmap ab.",
+  "relatedIds": ["vorgehen", "priorisierung", "skalierung", "risiko-governance"]
+}
