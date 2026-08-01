@@ -3,7 +3,6 @@ import { useVoiceInput } from '../hooks/useVoiceInput'
 import { classifyQuestion, getResolvedName, getResolvedSteps, threads } from '../lib/classifier'
 import { saveFeedback } from '../lib/storage'
 import type { ClassificationResult, FeedbackEntry } from '../types/thread'
-import type { CachePersistence, CacheState, SpeechProfile } from '../types/speech'
 
 function createFeedbackId(): string {
   return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
@@ -25,30 +24,8 @@ function evidenceLabel(result: ClassificationResult): string {
   return 'Alternative / Zuordnung'
 }
 
-function profileLabel(profile: SpeechProfile | null): string {
-  if (profile === 'quality-fp16-q8') return 'Base · FP16/q8'
-  if (profile === 'balanced-q8') return 'Base · q8/q8'
-  if (profile === 'cpu-tiny-q8') return 'Tiny · CPU q8'
-  return 'noch nicht geladen'
-}
-
-function cacheLabel(state: CacheState, persistence: CachePersistence): string {
-  if (state === 'unsupported') return 'Cache API nicht verfügbar'
-  if (state === 'unreliable') return 'wiederholt geleert'
-  if (state === 'present') return persistence === 'persistent' ? 'vorhanden · persistent' : 'vorhanden · Best Effort'
-  if (state === 'empty') return 'noch leer'
-  return 'wird geprüft'
-}
-
-function formatMilliseconds(value: number): string {
-  if (value < 1_000) return `${value} ms`
-  return `${(value / 1_000).toFixed(1).replace('.', ',')} s`
-}
-
 function MicrophoneIcon({ recording }: { recording: boolean }) {
-  if (recording) {
-    return <span className="stop-symbol" aria-hidden="true" />
-  }
+  if (recording) return <span className="stop-symbol" aria-hidden="true" />
 
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -129,20 +106,7 @@ export function AnalyzeView({ onFeedbackSaved }: { onFeedbackSaved: () => void }
   }
 
   const recording = voice.phase === 'recording'
-  const processing = [
-    'requesting-permission',
-    'finishing-recording',
-    'preparing-audio',
-    'loading-model',
-    'transcribing',
-    'discarded',
-  ].includes(voice.phase)
-  const diagnosticsVisible = Boolean(
-    voice.diagnostics.profile
-    || voice.diagnostics.timings
-    || voice.diagnostics.audioQuality
-    || voice.diagnostics.cacheState !== 'unknown',
-  )
+  const processing = ['checking-model', 'installing-model', 'stopping'].includes(voice.phase)
 
   const handleMicrophone = () => {
     if (recording) {
@@ -150,9 +114,7 @@ export function AnalyzeView({ onFeedbackSaved }: { onFeedbackSaved: () => void }
       focusInput()
       return
     }
-    if (!processing) {
-      void voice.startRecording().then(focusInput)
-    }
+    if (!processing) void voice.startRecording().then(focusInput)
   }
 
   return (
@@ -167,8 +129,10 @@ export function AnalyzeView({ onFeedbackSaved }: { onFeedbackSaved: () => void }
             type="button"
             onClick={handleMicrophone}
             disabled={!voice.supported || (processing && !recording)}
-            aria-label={recording ? 'Aufnahme beenden und transkribieren' : 'Sprachaufnahme starten'}
-            title={voice.supported ? 'Frage sprechen' : 'Sprachaufnahme wird von diesem Browser nicht unterstützt'}
+            aria-label={recording ? 'Aufnahme beenden und lokal erkennen' : 'Lokale Sprachaufnahme starten'}
+            title={voice.supported
+              ? 'Frage lokal mit Edge erkennen'
+              : 'Lokale Spracherkennung wird von diesem Browser nicht unterstützt'}
           >
             <MicrophoneIcon recording={recording} />
           </button>
@@ -201,6 +165,7 @@ export function AnalyzeView({ onFeedbackSaved }: { onFeedbackSaved: () => void }
             }}
           />
         </div>
+
         {(voice.status || voice.error) && (
           <div className={voice.error ? 'speech-status error' : `speech-status phase-${voice.phase}`} role="status">
             <span aria-hidden="true" />
@@ -208,49 +173,10 @@ export function AnalyzeView({ onFeedbackSaved }: { onFeedbackSaved: () => void }
           </div>
         )}
 
-        {diagnosticsVisible && (
-          <details className="speech-diagnostics">
-            <summary>Sprachdiagnose</summary>
-            <dl>
-              <div><dt>Profil</dt><dd>{profileLabel(voice.diagnostics.profile)}</dd></div>
-              <div><dt>Cache</dt><dd>{cacheLabel(voice.diagnostics.cacheState, voice.diagnostics.cachePersistence)}</dd></div>
-              {voice.diagnostics.timings && (
-                <>
-                  <div><dt>Nach Enter</dt><dd>{formatMilliseconds(voice.diagnostics.timings.totalAfterEnterMs)}</dd></div>
-                  <div><dt>Audio</dt><dd>{formatMilliseconds(voice.diagnostics.timings.audioPreparationMs)}</dd></div>
-                  <div><dt>Modell warten</dt><dd>{formatMilliseconds(voice.diagnostics.timings.modelWaitMs)}</dd></div>
-                  <div><dt>Inferenz</dt><dd>{formatMilliseconds(voice.diagnostics.timings.inferenceMs)}</dd></div>
-                  <div><dt>Echtzeitfaktor</dt><dd>{voice.diagnostics.timings.realtimeFactor.toFixed(2).replace('.', ',')}×</dd></div>
-                </>
-              )}
-              {voice.diagnostics.audioQuality && (
-                <>
-                  <div><dt>Audioqualität</dt><dd>{voice.diagnostics.audioQuality.level === 'good' ? 'geeignet' : voice.diagnostics.audioQuality.level === 'warning' ? 'eingeschränkt' : 'ungeeignet'}</dd></div>
-                  <div><dt>Pegel</dt><dd>{voice.diagnostics.audioQuality.rmsDbfs} dBFS</dd></div>
-                </>
-              )}
-            </dl>
-
-            {voice.diagnostics.audioQuality?.warnings.map((warning) => (
-              <p className="speech-diagnostic-warning" key={warning}>{warning}</p>
-            ))}
-            {voice.diagnostics.cacheState === 'unreliable' && (
-              <p className="speech-diagnostic-warning">
-                Der Browser hat den Modellcache wiederholt geleert. Die Website als App installieren oder diese Website vom automatischen Löschen der Websitedaten ausnehmen.
-              </p>
-            )}
-            {voice.diagnostics.performanceRecommendation === 'balanced-q8' && voice.preferredProfile !== 'balanced-q8' && (
-              <div className="speech-recommendation">
-                <p>FP16/q8 war bei mindestens zwei geeigneten Folgeaufnahmen deutlich langsamer als Echtzeit.</p>
-                <button type="button" onClick={() => voice.setPreferredProfile('balanced-q8')}>q8/q8 testen</button>
-              </div>
-            )}
-            {voice.preferredProfile === 'balanced-q8' && (
-              <button className="speech-profile-reset" type="button" onClick={() => voice.setPreferredProfile('quality-fp16-q8')}>
-                Zurück zu FP16/q8
-              </button>
-            )}
-          </details>
+        {voice.diagnostics.engine === 'edge-local' && voice.diagnostics.recognitionMs !== null && (
+          <p className="speech-native-note">
+            Edge lokal · de-DE · {(voice.diagnostics.recognitionMs / 1_000).toFixed(1).replace('.', ',')} s nach Enter
+          </p>
         )}
 
         {error && <p className="error-message" role="alert">{error}</p>}
