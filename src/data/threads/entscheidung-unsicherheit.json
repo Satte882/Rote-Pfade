@@ -21,27 +21,40 @@
   ],
   "mnemonic": "Nicht alles wissen – das Entscheidende absichern",
   "cues": [
-    { "text": "unter unsicherheit", "weight": 7 },
-    { "text": "unvollständige informationen", "weight": 7 },
-    { "text": "informationen fehlen", "weight": 6 },
-    { "text": "unklare datenlage", "weight": 6 },
-    { "text": "trotz fehlender daten", "weight": 6 },
-    { "text": "noch nicht wissen", "weight": 4 },
-    { "text": "begrenzte entscheidung", "weight": 4 },
-    { "text": "reversibel", "weight": 4 },
+    { "text": "unter unsicherheit", "weight": 8 },
+    { "text": "unvollständige informationen", "weight": 8 },
+    { "text": "informationen fehlen", "weight": 7 },
+    { "text": "unklare datenlage", "weight": 7 },
+    { "text": "trotz fehlender daten", "weight": 7 },
+    { "text": "noch keine daten", "weight": 7 },
+    { "text": "noch keine nutzungsdaten", "weight": 8 },
+    { "text": "machbarkeit unklar", "weight": 8 },
+    { "text": "noch nicht belegt", "weight": 7 },
+    { "text": "noch nicht bewiesen", "weight": 7 },
+    { "text": "fehlende evidenz", "weight": 7 },
+    { "text": "keine belastbare grundlage", "weight": 7 },
+    { "text": "business case noch offen", "weight": 8 },
+    { "text": "fehlender business case", "weight": 8 },
+    { "text": "management braucht trotzdem eine empfehlung", "weight": 8 },
+    { "text": "wir müssen jetzt entscheiden", "weight": 5 },
+    { "text": "obwohl", "weight": 2 },
+    { "text": "reversibel", "weight": 5 },
     { "text": "pilotieren", "weight": 2 },
     { "text": "nachsteuern", "weight": 2 }
   ],
   "antiCues": [
-    { "text": "make or buy", "weight": 2 },
+    { "text": "make or buy", "weight": 3 },
     { "text": "was ist der unterschied", "weight": 4 },
-    { "text": "erzählen sie von", "weight": 4 }
+    { "text": "erzählen sie von", "weight": 4 },
+    { "text": "daten sind vollständig", "weight": 5 }
   ],
   "examples": [
     "Wie entscheiden Sie über den nächsten Pilot-Schritt, obwohl noch keine vollständigen Nutzungsdaten vorliegen?",
     "Das Management verlangt eine Empfehlung, aber wesentliche Informationen fehlen.",
     "Wie gehen Sie mit einer unklaren Datenlage bei einer strategischen Entscheidung um?",
-    "Sie müssen handeln, obwohl die technische Machbarkeit noch nicht abschließend belegt ist."
+    "Sie müssen handeln, obwohl die technische Machbarkeit noch nicht abschließend belegt ist.",
+    "Wir haben noch keine Nutzungsdaten. Was empfehlen Sie?",
+    "Wie entscheiden Sie bei einem noch offenen Business Case?"
   ],
   "opening": "Bei {topic} kläre ich zuerst, welche Informationen fehlen und welche davon wirklich entscheidungskritisch sind. Danach reduziere ich gezielt die größte Unsicherheit.",
   "relatedIds": ["entscheidung", "risiko-governance", "ki-eignung"]
