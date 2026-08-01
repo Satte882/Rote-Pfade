@@ -1,6 +1,6 @@
 # Rote Pfade
 
-Eine vollständig clientseitige React-Anwendung, die kurze Satzfragmente oder vollständige Interviewfragen einem passenden Antwortmuster zuordnet.
+Eine clientseitige React-Anwendung, die kurze Satzfragmente oder vollständige Interviewfragen einem passenden Antwortmuster zuordnet.
 
 ## Ziel
 
@@ -16,50 +16,93 @@ Die Klassifikation wird nicht an ein externes LLM oder Backend übertragen. Die 
 
 ## Funktionen
 
-- Texteingabe oder lokale Spracheingabe über das Mikrofon
+- Texteingabe und Diktat über die Windows-Funktion `Win + H`
 - Hauptfaden und zwei alternative Zuordnungen
-- fachliche Varianten innerhalb eines Fadens, zum Beispiel Make-or-Buy, Anbieterauswahl oder Prozessanalyse
+- fachliche Varianten, zum Beispiel Make-or-Buy, Anbieterauswahl oder Prozessanalyse
 - kompakte, nummerierte Antwortschritte
 - Kennzeichnung als klare, mehrdeutige oder schwach belegte Zuordnung
 - 14 konsolidierte rote Fäden
-- anonymisierte, rollenbezogene Interviewbeispiele
 - Trainingsmodus mit lokaler Statistik
 - durchsuchbare Fadenbibliothek einschließlich Varianten
 - lokale Korrektur von Faden und Variante
 - erneute Verwendung einer Korrektur bei derselben normalisierten Eingabe
 - JSON-Export und -Import der lokalen Daten
+- isoliertes Speech-Lab für reproduzierbare Browser-ASR-Diagnosen
 - automatisches Deployment über GitHub Pages
 
 Lokale Korrekturen sind deterministische Overrides für identische Eingaben. Es findet kein Modelltraining statt und ähnliche, aber nicht identische Eingaben werden nicht automatisch verändert.
 
-## Spracheingabe
+## Produktiver Spracheingabe-Workflow
 
-Die App verwendet die lokale SpeechRecognition-Funktion des Browsers mit `processLocally = true` und der Sprache `de-DE`.
+Die App enthält bewusst keinen produktiven Mikrofonbutton mehr. Die bisherigen Browser-Lösungen waren auf der getesteten Zielhardware entweder nicht verfügbar oder qualitativ und zeitlich unzureichend.
 
-Der Ablauf ist:
+Der belastbare Sofortweg unter Windows ist:
 
-1. Mikrofon anklicken.
-2. Verfügbarkeit des lokalen deutschen Sprachmodells prüfen.
-3. Das Sprachpaket bei Bedarf einmalig über den Browser installieren.
-4. Frage sprechen.
-5. Enter drücken oder den Stopp-Button anklicken.
-6. Das lokale Browsermodell liefert das Transkript.
-7. Das Transkript wird automatisch klassifiziert und bleibt editierbar.
+1. Im Bereich **Erkennen** das Textfeld fokussieren.
+2. `Win + H` drücken.
+3. Die Frage diktieren.
+4. Diktat beenden und Enter drücken.
+5. Die vorhandene Klassifikation läuft unverändert.
 
-Es gibt keinen Cloud-Fallback und keinen Whisper-Worker mehr. Ist verbindlich lokale Erkennung nicht verfügbar, zeigt die App einen Fehler statt Audio an einen externen Dienst zu senden.
+Die Windows-Diktierfunktion ist vom App-Code getrennt. Ihre Verarbeitung und Datenschutzbedingungen richten sich nach Windows-, Konto- und Unternehmensrichtlinien; die App behauptet dafür keine lokale Verarbeitung.
 
-### Voraussetzung
+## Speech-Lab
 
-Der Zielbrowser ist Microsoft Edge mit Unterstützung für lokale SpeechRecognition. In Edge-Versionen, in denen die Funktion noch hinter einem Schalter liegt, muss unter `edge://flags` die Option **Speech Recognition with on-device model** aktiviert werden.
+Das Speech-Lab ist ein Diagnosebereich und kein produktiver Eingabepfad. Es wird erst über das Menü geöffnet. Die schweren Modellartefakte werden nicht für den normalen Klassifikationsworkflow benötigt.
 
-### Tastaturverhalten
+### Ziel
 
-| Zustand | Enter | Escape |
-|---|---|---|
-| Texteingabe | klassifizieren | Eingabe und Ergebnis löschen |
-| Aufnahme läuft | lokale Erkennung abschließen | Aufnahme verwerfen |
-| Sprachpaket wird geprüft oder installiert | keine Aktion | Vorgang verwerfen |
-| Ergebnis sichtbar | erneut klassifizieren | Eingabe und Ergebnis löschen |
+Das Lab beantwortet reproduzierbar drei Fragen:
+
+1. Ist der von `MediaRecorder` erzeugte Blob technisch intakt?
+2. Ist das exakt an Whisper übergebene 16-kHz-PCM hörbar und vollständig?
+3. Welche Modell-/Backend-Konfiguration erreicht auf der Zielhardware die geforderte Qualität und Latenz?
+
+### Audio-Validierung
+
+Eine Aufnahme wird vor jedem Modelltest geprüft auf:
+
+- Blob-Größe und MIME-Typ
+- Anzahl der von `MediaRecorder` gelieferten Chunks
+- reale und dekodierte Dauer
+- Abweichung zwischen realer und dekodierter Dauer
+- gemeldete Capture-Samplerate
+- Dekodierungs-Samplerate und Kanalzahl
+- Anzahl der PCM-Samples
+- RMS-Pegel und Peak
+- Anteil praktisch leerer Samples
+- Stille am Anfang und Ende
+
+Die Rohaufnahme und das tatsächlich getestete 16-kHz-PCM werden getrennt als Audio-Player angeboten. Modelltests sind blockiert, solange die Aufnahme technisch ungeeignet ist.
+
+### Reproduzierbarer Modellvergleich
+
+Jede gewählte Konfiguration erhält exakt dasselbe PCM zweimal:
+
+1. erster Lauf einschließlich Backend-Aufwärmung
+2. zweiter Lauf mit bereits warmem Modell
+
+Enthalten sind:
+
+- explizite Baseline: Whisper Base q4/q4 über WebGPU
+- Whisper Base q8/q8 über WebGPU
+- Whisper Base FP16/q8 über WebGPU
+- optional Whisper Tiny q8 über WebGPU als Größenreferenz
+- optional Whisper Tiny q8 über WASM als Backend-Referenz
+
+Es gibt keinen automatischen Fallback zwischen Profilen. Fehler und Ergebnisse bleiben pro Profil sichtbar.
+
+### Harte Abnahmekriterien
+
+Für eine belastbare Referenz muss die Aufnahme 3 bis 12 Sekunden lang sein.
+
+Eine Konfiguration besteht nur, wenn der warme Lauf gleichzeitig erfüllt:
+
+- Inferenzzeit höchstens 1,5 Sekunden
+- Echtzeitfaktor höchstens 0,5
+- Word Error Rate höchstens 15 Prozent
+
+Wenn bereits die warme q4/q4-Baseline mehr als 3 Sekunden benötigt, beendet das Lab die Testreihe. Dann gilt der Browser-Ansatz auf dieser Hardware als verworfen; weitere Modellvarianten werden nicht automatisch durchprobiert.
 
 ## Die 14 Fäden
 
@@ -97,12 +140,12 @@ Die Variante wird aus eigenen Signalen und Beispielen bestimmt. Gibt es keine au
 
 Die Klassifikation kombiniert:
 
-1. exakte und normalisierte Cue-Treffer,
-2. tokenbasierte Abdeckung natürlich formulierter Varianten,
-3. Ähnlichkeit zu anonymisierten Beispielen,
-4. positive und negative Signale,
-5. fachliche Varianten innerhalb eines Fadens,
-6. lokal bestätigte Overrides bei identischen normalisierten Eingaben.
+1. exakte und normalisierte Cue-Treffer
+2. tokenbasierte Abdeckung natürlich formulierter Varianten
+3. Ähnlichkeit zu anonymisierten Beispielen
+4. positive und negative Signale
+5. fachliche Varianten innerhalb eines Fadens
+6. lokal bestätigte Overrides bei identischen normalisierten Eingaben
 
 Die Ausgabe ist eine nachvollziehbare Heuristik und keine statistisch kalibrierte Wahrscheinlichkeit. Bei geringem Abstand zwischen zwei Kandidaten wird die Zuordnung als mehrdeutig gekennzeichnet. Bei wenig Evidenz wird dies ebenfalls sichtbar gemacht.
 
@@ -113,7 +156,7 @@ npm install
 npm run dev
 ```
 
-Mikrofonzugriff und lokale SpeechRecognition benötigen einen sicheren Kontext. `localhost` und GitHub Pages erfüllen diese Voraussetzung.
+Mikrofonzugriff, WebGPU und WASM benötigen einen sicheren Kontext. `localhost` und GitHub Pages erfüllen diese Voraussetzung.
 
 ## Test und Build
 
@@ -122,21 +165,9 @@ npm run test:run
 npm run build
 ```
 
-Die Regressionstests enthalten mehr als 50 kurze und vollständige Intervieweingaben aus Strategie, KI, Digitalisierung, Produkt-, Prozess- und Transformationskontexten. Zusätzlich werden Varianten, schwache Evidenz und lokale Overrides geprüft.
+Die Regressionstests enthalten mehr als 50 kurze und vollständige Intervieweingaben. Zusätzlich werden Varianten, schwache Evidenz, lokale Overrides, Word Error Rate, Audioqualitäts-Gates, Dauerprüfung und das q4-Abbruchkriterium geprüft.
 
 Pull Requests und Feature-Branches werden über `.github/workflows/validate.yml` getestet und gebaut. Pushes auf `main` werden über `.github/workflows/deploy.yml` getestet, gebaut und auf GitHub Pages veröffentlicht.
-
-### Manueller Browser-Test für Spracheingabe
-
-1. Edge-Version prüfen.
-2. Falls erforderlich `edge://flags` öffnen und **Speech Recognition with on-device model** aktivieren.
-3. Seite neu starten und Mikrofon anklicken.
-4. Deutsches Sprachpaket installieren lassen, falls die App dies meldet.
-5. „Wie würden Sie eine Make-or-Buy-Entscheidung treffen?“ sprechen.
-6. Enter drücken.
-7. Transkript und Make-or-Buy-Faden prüfen.
-8. Browser offline schalten und eine zweite Frage testen.
-9. Escape während der Aufnahme prüfen.
 
 ## GitHub Pages
 
@@ -146,16 +177,19 @@ Einmalig in GitHub konfigurieren:
 2. Unter **Build and deployment** als Source **GitHub Actions** auswählen.
 3. Falls GitHub Pages im privaten Repository nicht verfügbar ist, das Repository auf **Public** stellen.
 
-Danach ist die Anwendung voraussichtlich unter folgender URL erreichbar:
+Danach ist die Anwendung unter folgender URL erreichbar:
 
 `https://satte882.github.io/Rote-Pfade/`
 
 ## Daten und Datenschutz
 
-- Die lokale SpeechRecognition verarbeitet Audio auf dem Gerät.
-- Es gibt keinen Cloud-Fallback.
+- Die reguläre Klassifikation verarbeitet Fragen im Browser.
 - Fragen, Transkripte und lokale Korrekturen bleiben im jeweiligen Browser.
-- Exportdateien enthalten nur die lokal gespeicherten Zuordnungen und Trainingsstatistiken, keine Audioaufnahmen.
+- Exportdateien enthalten nur lokal gespeicherte Zuordnungen und Trainingsstatistiken.
+- Das Speech-Lab hält Audio nur für die aktuelle Browsersitzung und speichert es nicht in der App-Datenablage.
+- Beim Start eines Speech-Lab-Modelltests werden Modellartefakte von Hugging Face geladen und im Browsercache gespeichert.
+- Das Speech-Lab sendet die aufgenommene Audiodatei nicht an Hugging Face oder ein App-Backend.
+- Die Windows-Diktierfunktion ist ein externer Betriebssystemdienst und unterliegt den Windows-Richtlinien.
 - Die öffentliche App enthält ausschließlich generische, anonymisierte Beispiele.
 - Private Prompts und Inhalte aus dem Repository `skills` sind nicht eingebunden.
 
