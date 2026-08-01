@@ -1,7 +1,7 @@
 {
   "name": "rote-pfade",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,6 +11,7 @@
     "test:run": "vitest run"
   },
   "dependencies": {
+    "@huggingface/transformers": "^3.8.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
