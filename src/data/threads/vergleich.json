@@ -21,17 +21,21 @@
   ],
   "mnemonic": "Erst verbinden, dann trennen",
   "cues": [
-    { "text": "was ist der unterschied", "weight": 7 },
-    { "text": "unterschied zwischen", "weight": 7 },
-    { "text": "wie grenzen sie", "weight": 6 },
+    { "text": "was ist der unterschied", "weight": 8 },
+    { "text": "unterschied zwischen", "weight": 8 },
+    { "text": "wie grenzen sie", "weight": 7 },
+    { "text": "wann setzen sie was ein", "weight": 7 },
+    { "text": "welcher ansatz wann", "weight": 6 },
     { "text": "oder wann", "weight": 3 },
-    { "text": "agil oder klassisch", "weight": 6 },
-    { "text": "pilot mvp proof of concept", "weight": 6 },
-    { "text": "vergleich", "weight": 4 },
-    { "text": "abgrenzung", "weight": 5 }
+    { "text": "agil oder klassisch", "weight": 7 },
+    { "text": "pilot mvp proof of concept", "weight": 7 },
+    { "text": "pilot oder direktrollout", "weight": 6 },
+    { "text": "vergleich", "weight": 5 },
+    { "text": "abgrenzung", "weight": 6 }
   ],
   "antiCues": [
-    { "text": "wie entscheiden sie zwischen", "weight": 2 },
+    { "text": "anhand von kriterien bewerten", "weight": 3 },
+    { "text": "entscheidungsvorlage", "weight": 3 },
     { "text": "problem lösen", "weight": 3 },
     { "text": "mitarbeiter mitnehmen", "weight": 3 }
   ],
@@ -39,7 +43,8 @@
     "Was ist der Unterschied zwischen Proof of Concept, Pilot und MVP?",
     "Wie grenzen Sie Value-Stream-Analyse und Prozessanalyse voneinander ab?",
     "Agil oder klassisch: Wann setzen Sie welchen Ansatz ein?",
-    "Was unterscheidet einen AI Product Owner von einem AI Business Architect?"
+    "Was unterscheidet einen AI Product Owner von einem AI Business Architect?",
+    "Wie entscheiden Sie zwischen Pilot und direktem Rollout?"
   ],
   "opening": "Beide Ansätze haben bei {topic} einen gemeinsamen Bezug, unterscheiden sich aber vor allem in Ziel, Betrachtungsebene und Einsatzkontext.",
   "relatedIds": ["entscheidung", "vorgehen"]
