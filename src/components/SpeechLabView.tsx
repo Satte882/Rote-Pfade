@@ -103,7 +103,12 @@ export function SpeechLabView() {
   const recordingStartedAtRef = useRef(0)
   const captureSampleRateRef = useRef<number | null>(null)
   const activeWorkerRef = useRef<Worker | null>(null)
+  const activeResolveRef = useRef<((message: SpeechLabWorkerMessage) => void) | null>(null)
+  const activeRunIdRef = useRef<string | null>(null)
+  const activeProfileRef = useRef<SpeechLabProfileId | null>(null)
   const cancelledRef = useRef(false)
+  const rawUrlRef = useRef('')
+  const wavUrlRef = useRef('')
 
   const selectedCount = selectedProfiles.size
   const referenceDurationValid = validation ? isReferenceDuration(validation.decodedDurationMs) : false
@@ -111,14 +116,17 @@ export function SpeechLabView() {
   const verdict = useMemo(() => {
     if (baselineAbort) return 'q4/q4 überschreitet 3 Sekunden: Browser-Ansatz auf dieser Hardware abbrechen.'
     if (results.length === 0) return ''
+    if (!referenceDurationValid) return 'Keine belastbare Latenzentscheidung: Die Referenzaufnahme muss 3 bis 12 Sekunden lang sein.'
     const accepted = results.find((result) => result.latencyPass && result.qualityPass)
     if (accepted) return `${PROFILES.find((profile) => profile.id === accepted.profile)?.label}: erfüllt WER- und Latenzgrenze.`
     return 'Keine getestete Konfiguration erfüllt gleichzeitig WER ≤ 15 % und die definierte Latenzgrenze.'
-  }, [baselineAbort, results])
+  }, [baselineAbort, referenceDurationValid, results])
 
   const revokeUrls = () => {
-    if (rawUrl) URL.revokeObjectURL(rawUrl)
-    if (wavUrl) URL.revokeObjectURL(wavUrl)
+    if (rawUrlRef.current) URL.revokeObjectURL(rawUrlRef.current)
+    if (wavUrlRef.current) URL.revokeObjectURL(wavUrlRef.current)
+    rawUrlRef.current = ''
+    wavUrlRef.current = ''
   }
 
   const resetAudio = () => {
@@ -141,10 +149,15 @@ export function SpeechLabView() {
     metadata: { chunkCount: number; wallDurationMs: number | null; captureSampleRate: number | null },
   ) => {
     resetAudio()
+    setError('')
     setStatus('Blob wird dekodiert, validiert und auf 16 kHz PCM normalisiert.')
     const prepared = await decodeValidateAndPrepare(blob, metadata)
-    setRawUrl(URL.createObjectURL(blob))
-    setWavUrl(URL.createObjectURL(prepared.wav))
+    const nextRawUrl = URL.createObjectURL(blob)
+    const nextWavUrl = URL.createObjectURL(prepared.wav)
+    rawUrlRef.current = nextRawUrl
+    wavUrlRef.current = nextWavUrl
+    setRawUrl(nextRawUrl)
+    setWavUrl(nextWavUrl)
     setValidation(prepared.validation)
     setPcm(prepared.pcm)
     setStatus(prepared.validation.eligible
@@ -249,8 +262,20 @@ export function SpeechLabView() {
     audioDurationMs: number,
   ): Promise<SpeechLabWorkerMessage> => new Promise((resolve) => {
     const worker = new Worker(new URL('../workers/speechLab.worker.ts', import.meta.url), { type: 'module' })
-    activeWorkerRef.current = worker
     const id = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
+    activeWorkerRef.current = worker
+    activeResolveRef.current = resolve
+    activeRunIdRef.current = id
+    activeProfileRef.current = profile
+
+    const finish = (message: SpeechLabWorkerMessage) => {
+      worker.terminate()
+      if (activeWorkerRef.current === worker) activeWorkerRef.current = null
+      activeResolveRef.current = null
+      activeRunIdRef.current = null
+      activeProfileRef.current = null
+      resolve(message)
+    }
 
     worker.addEventListener('message', (event: MessageEvent<SpeechLabWorkerMessage>) => {
       const message = event.data
@@ -260,15 +285,11 @@ export function SpeechLabView() {
         setStatus(`${PROFILES.find((item) => item.id === profile)?.label}: ${message.message}${progress}`)
         return
       }
-      worker.terminate()
-      if (activeWorkerRef.current === worker) activeWorkerRef.current = null
-      resolve(message)
+      finish(message)
     })
 
     worker.addEventListener('error', (event) => {
-      worker.terminate()
-      if (activeWorkerRef.current === worker) activeWorkerRef.current = null
-      resolve({ type: 'error', id, profile, message: event.message || 'Worker ist fehlgeschlagen.' })
+      finish({ type: 'error', id, profile, message: event.message || 'Worker ist fehlgeschlagen.' })
     })
 
     const audio = source.slice()
@@ -282,7 +303,7 @@ export function SpeechLabView() {
   })
 
   const runSelectedProfiles = async () => {
-    if (!pcm || !validation || !validation.eligible || running || selectedCount === 0) return
+    if (!pcm || !validation || !validation.eligible || running || selectedCount === 0 || !reference.trim()) return
     setRunning(true)
     setError('')
     setResults([])
@@ -291,6 +312,7 @@ export function SpeechLabView() {
 
     const nextResults: SpeechLabRunResult[] = []
     const profiles = profileOrder([...selectedProfiles])
+    let abortedByBaseline = false
     try {
       for (const profile of profiles) {
         if (cancelledRef.current) break
@@ -322,12 +344,13 @@ export function SpeechLabView() {
             validation.eligible,
           )
         ) {
+          abortedByBaseline = true
           setBaselineAbort(true)
           setStatus('Abbruchkriterium erreicht: q4/q4 braucht im warmen Lauf mehr als 3 Sekunden.')
           break
         }
       }
-      if (!cancelledRef.current && !baselineAbort) setStatus('Modellvergleich abgeschlossen.')
+      if (!cancelledRef.current && !abortedByBaseline) setStatus('Modellvergleich abgeschlossen.')
     } finally {
       setRunning(false)
     }
@@ -335,8 +358,15 @@ export function SpeechLabView() {
 
   const cancelRun = () => {
     cancelledRef.current = true
+    const resolve = activeResolveRef.current
+    const id = activeRunIdRef.current
+    const profile = activeProfileRef.current
+    activeResolveRef.current = null
+    activeRunIdRef.current = null
+    activeProfileRef.current = null
     activeWorkerRef.current?.terminate()
     activeWorkerRef.current = null
+    if (resolve && id && profile) resolve({ type: 'error', id, profile, message: 'Test abgebrochen.' })
     setRunning(false)
     setStatus('Modellvergleich abgebrochen.')
   }
@@ -351,12 +381,12 @@ export function SpeechLabView() {
   }
 
   useEffect(() => () => {
+    cancelledRef.current = true
     activeWorkerRef.current?.terminate()
     if (recorderRef.current?.state === 'recording') recorderRef.current.stop()
     stopStream()
-    if (rawUrl) URL.revokeObjectURL(rawUrl)
-    if (wavUrl) URL.revokeObjectURL(wavUrl)
-  }, [rawUrl, wavUrl])
+    revokeUrls()
+  }, [])
 
   return (
     <section className="speech-lab" aria-label="Speech-Lab">
@@ -446,7 +476,7 @@ export function SpeechLabView() {
           <button
             type="button"
             onClick={runSelectedProfiles}
-            disabled={!validation?.eligible || !pcm || running || selectedCount === 0}
+            disabled={!validation?.eligible || !pcm || running || selectedCount === 0 || !reference.trim()}
           >
             Ausgewählte Profile testen
           </button>
@@ -482,7 +512,7 @@ export function SpeechLabView() {
                     <td>{result.warmRealtimeFactor.toFixed(2).replace('.', ',')}</td>
                     <td>{formatPercent(result.warmWer)}</td>
                     <td>{result.warmTranscript || 'kein Text'}</td>
-                    <td>{result.latencyPass && result.qualityPass ? 'bestanden' : 'nicht bestanden'}</td>
+                    <td>{referenceDurationValid && result.latencyPass && result.qualityPass ? 'bestanden' : 'nicht bestanden'}</td>
                   </tr>
                 ))}
               </tbody>
