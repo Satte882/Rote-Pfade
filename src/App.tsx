@@ -1,16 +1,22 @@
-import { useRef, useState } from 'react'
+import { lazy, Suspense, useRef, useState } from 'react'
 import { AnalyzeView } from './components/AnalyzeView'
 import { DataControls } from './components/DataControls'
 import { LibraryView } from './components/LibraryView'
 import { TrainingView } from './components/TrainingView'
 
-type Tab = 'analyse' | 'training' | 'library'
+const SpeechLabView = lazy(async () => {
+  const module = await import('./components/SpeechLabView')
+  return { default: module.SpeechLabView }
+})
+
+type Tab = 'analyse' | 'training' | 'library' | 'speech-lab'
 type Layout = 'vertical' | 'horizontal'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'analyse', label: 'Erkennen' },
   { id: 'training', label: 'Training' },
   { id: 'library', label: 'Fäden' },
+  { id: 'speech-lab', label: 'Speech-Lab' },
 ]
 
 const LAYOUT_KEY = 'rote-pfade.layout.v1'
@@ -89,6 +95,11 @@ export default function App() {
         {activeTab === 'analyse' && <AnalyzeView onFeedbackSaved={notifyDataChanged} />}
         {activeTab === 'training' && <TrainingView dataVersion={dataVersion} />}
         {activeTab === 'library' && <LibraryView />}
+        {activeTab === 'speech-lab' && (
+          <Suspense fallback={<p className="view-loading">Speech-Lab wird geladen.</p>}>
+            <SpeechLabView />
+          </Suspense>
+        )}
       </main>
     </div>
   )
