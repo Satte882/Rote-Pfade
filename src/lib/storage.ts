@@ -5,6 +5,10 @@ const TRAINING_KEY = 'rote-pfade.training.v1'
 
 const emptyStats = (): TrainingStats => ({ answered: 0, correct: 0, byThread: {} })
 
+function hasLocalStorage(): boolean {
+  return typeof localStorage !== 'undefined'
+}
+
 function safeParse<T>(value: string | null, fallback: T): T {
   if (!value) return fallback
   try {
@@ -14,17 +18,35 @@ function safeParse<T>(value: string | null, fallback: T): T {
   }
 }
 
+function normalizeFeedbackKey(value: string): string {
+  return value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLocaleLowerCase('de-DE')
+    .replace(/[^a-z0-9äöüß]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ')
+}
+
 export function loadFeedback(): FeedbackEntry[] {
+  if (!hasLocalStorage()) return []
   return safeParse<FeedbackEntry[]>(localStorage.getItem(FEEDBACK_KEY), [])
+}
+
+export function findFeedbackOverride(question: string): FeedbackEntry | undefined {
+  const key = normalizeFeedbackKey(question)
+  if (!key) return undefined
+  return loadFeedback().find((entry) => normalizeFeedbackKey(entry.question) === key)
 }
 
 export function saveFeedback(entry: FeedbackEntry): FeedbackEntry[] {
   const next = [entry, ...loadFeedback()].slice(0, 1000)
-  localStorage.setItem(FEEDBACK_KEY, JSON.stringify(next))
+  if (hasLocalStorage()) localStorage.setItem(FEEDBACK_KEY, JSON.stringify(next))
   return next
 }
 
 export function loadTrainingStats(): TrainingStats {
+  if (!hasLocalStorage()) return emptyStats()
   return safeParse<TrainingStats>(localStorage.getItem(TRAINING_KEY), emptyStats())
 }
 
@@ -42,7 +64,7 @@ export function saveTrainingAnswer(threadId: string, correct: boolean): Training
       },
     },
   }
-  localStorage.setItem(TRAINING_KEY, JSON.stringify(next))
+  if (hasLocalStorage()) localStorage.setItem(TRAINING_KEY, JSON.stringify(next))
   return next
 }
 
@@ -74,12 +96,14 @@ export async function importExport(file: File): Promise<ExportPayload> {
     throw new Error('Die Datei hat kein gültiges Rote-Pfade-Exportformat.')
   }
 
+  if (!hasLocalStorage()) throw new Error('Lokaler Browserspeicher ist nicht verfügbar.')
   localStorage.setItem(FEEDBACK_KEY, JSON.stringify(parsed.feedback))
   localStorage.setItem(TRAINING_KEY, JSON.stringify(parsed.trainingStats))
   return parsed as ExportPayload
 }
 
 export function clearLocalData(): void {
+  if (!hasLocalStorage()) return
   localStorage.removeItem(FEEDBACK_KEY)
   localStorage.removeItem(TRAINING_KEY)
 }
