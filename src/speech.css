@@ -72,6 +72,7 @@
 
 .speech-status.phase-recording > span,
 .speech-status.phase-requesting-permission > span,
+.speech-status.phase-finishing-recording > span,
 .speech-status.phase-preparing-audio > span,
 .speech-status.phase-loading-model > span,
 .speech-status.phase-transcribing > span {
@@ -83,9 +84,89 @@
 .speech-status.error { color: var(--danger); }
 .speech-status.error > span { background: var(--danger); }
 
+.speech-diagnostics {
+  padding-top: 2px;
+  color: var(--muted);
+  font-size: .66rem;
+}
+
+.speech-diagnostics > summary {
+  width: max-content;
+  max-width: 100%;
+  color: var(--faint);
+  cursor: pointer;
+}
+
+.speech-diagnostics[open] {
+  display: grid;
+  gap: 6px;
+}
+
+.speech-diagnostics dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px 10px;
+  margin: 0;
+}
+
+.speech-diagnostics dl > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 5px;
+  min-width: 0;
+  padding-bottom: 2px;
+  border-bottom: 1px solid #1a222b;
+}
+
+.speech-diagnostics dt {
+  min-width: 0;
+  color: var(--faint);
+}
+
+.speech-diagnostics dd {
+  margin: 0;
+  color: var(--text);
+  text-align: right;
+}
+
+.speech-diagnostic-warning,
+.speech-recommendation p {
+  margin: 0;
+  color: var(--danger);
+  line-height: 1.35;
+}
+
+.speech-recommendation {
+  display: grid;
+  gap: 5px;
+  padding-top: 2px;
+}
+
+.speech-recommendation button,
+.speech-profile-reset {
+  justify-self: start;
+  min-height: 27px;
+  padding: 4px 7px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: .65rem;
+}
+
+.speech-recommendation button:hover,
+.speech-profile-reset:hover {
+  border-color: var(--border-strong);
+  background: #171d24;
+}
+
 @keyframes speech-pulse {
   0%, 100% { opacity: .35; transform: scale(.8); }
   50% { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 420px) {
+  .speech-diagnostics dl { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {
