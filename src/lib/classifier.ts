@@ -3,7 +3,25 @@ import { extractTopic, jaccardSimilarity, normalizeText, tokenize } from './text
 
 const threadModules = import.meta.glob('../data/threads/*.json', { eager: true, import: 'default' })
 
-export const threads = Object.values(threadModules) as InterviewThread[]
+const THREAD_ORDER = [
+  'vorgehen',
+  'problem-stoerung',
+  'entscheidung',
+  'entscheidung-unsicherheit',
+  'ki-eignung',
+  'vergleich',
+  'skalierung',
+  'stakeholder-change',
+  'stakeholder-konflikt',
+  'risiko-governance',
+  'wirkung',
+  'priorisierung',
+  'star-l',
+]
+
+export const threads = (Object.values(threadModules) as InterviewThread[]).sort(
+  (left, right) => THREAD_ORDER.indexOf(left.id) - THREAD_ORDER.indexOf(right.id),
+)
 
 const tokenOverlapScore = (input: string, thread: InterviewThread): number => {
   const inputTokens = new Set(tokenize(input))
