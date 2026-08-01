@@ -1,0 +1,53 @@
+name: One-time branch cleanup
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/cleanup-branches.yml
+
+permissions:
+  contents: write
+
+jobs:
+  delete-merged-feature-branches:
+    if: github.event.head_commit.message == 'Run one-time merged branch cleanup'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Delete merged feature branches
+        shell: bash
+        run: |
+          set -euo pipefail
+          branches=(
+            feature/mvp
+            feature/compact-sidecar
+            feature/layout-modes
+            feature/content-quality-v2
+            feature/speech-input
+            feature/speech-quality-performance
+            feature/native-edge-speech
+            feature/speech-lab-win-dictation
+          )
+
+          for branch in "${branches[@]}"; do
+            if git ls-remote --exit-code --heads origin "refs/heads/$branch" >/dev/null 2>&1; then
+              git push origin --delete "$branch"
+            else
+              echo "Already absent: $branch"
+            fi
+          done
+
+      - name: Verify only main remains
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t heads < <(git ls-remote --heads origin | awk '{sub("refs/heads/", "", $2); print $2}' | sort)
+          printf 'Remaining branches:\n%s\n' "${heads[*]}"
+          test "${#heads[@]}" -eq 1
+          test "${heads[0]}" = "main"
