@@ -48,7 +48,8 @@
     "Wie wählen Sie zwischen zwei geeigneten Lösungsanbietern?",
     "Wie entscheiden Sie, ob ein Pilot fortgeführt oder beendet wird?",
     "Welche Lösung würden Sie dem Management empfehlen?",
-    "Sollten wir die Lösung intern entwickeln oder als Produkt zukaufen?"
+    "Sollten wir die Lösung intern entwickeln oder als Produkt zukaufen?",
+    "Sollen wir eine Managed-Plattform oder lokale LLMs nutzen?"
   ],
   "opening": "Für {topic} definiere ich zuerst die entscheidungsrelevanten Kriterien, bevor ich die Optionen bewerte und eine Empfehlung abgebe.",
   "relatedIds": ["entscheidung-unsicherheit", "priorisierung", "ki-eignung"],
@@ -76,6 +77,9 @@
         { "text": "build or buy", "weight": 9 },
         { "text": "intern entwickeln oder zukaufen", "weight": 9 },
         { "text": "selbst entwickeln oder kaufen", "weight": 8 },
+        { "text": "managed plattform oder lokale llm", "weight": 8 },
+        { "text": "saas oder lokal", "weight": 7 },
+        { "text": "cloud oder on premise", "weight": 7 },
         { "text": "eigenentwicklung", "weight": 5 },
         { "text": "zukaufen", "weight": 5 },
         { "text": "fremdbezug", "weight": 4 }
@@ -84,7 +88,9 @@
       "examples": [
         "Make or Buy",
         "Entwickeln wir die KI-Plattform selbst oder kaufen wir eine Lösung ein?",
-        "Wie bewerten Sie Eigenentwicklung gegenüber einem SaaS-Produkt?"
+        "Wie bewerten Sie Eigenentwicklung gegenüber einem SaaS-Produkt?",
+        "Sollen wir eine Managed-Plattform oder lokale LLMs nutzen?",
+        "Nutzen wir SaaS oder betreiben wir das LLM selbst?"
       ],
       "mnemonic": "Kriterien → Make/Buy/Hybrid → Fakten → Bewertung → Empfehlung",
       "opening": "Bei einer Make-or-Buy-Entscheidung lege ich zuerst die relevanten Kriterien fest und grenze Eigenentwicklung, Zukauf und mögliche Hybridformen sauber ab."
