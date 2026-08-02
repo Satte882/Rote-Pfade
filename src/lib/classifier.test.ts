@@ -12,6 +12,8 @@ const CASES: Case[] = [
   { input: 'make or buy', threadId: 'entscheidung', variantId: 'make-or-buy' },
   { input: 'build or buy', threadId: 'entscheidung', variantId: 'make-or-buy' },
   { input: 'Intern entwickeln oder zukaufen?', threadId: 'entscheidung', variantId: 'make-or-buy' },
+  { input: 'Sollen wir Langdock oder lokale LLM nutzen?', threadId: 'entscheidung', variantId: 'make-or-buy' },
+  { input: 'Sollten wir eine SaaS-Plattform oder lokale LLMs betreiben?', threadId: 'entscheidung', variantId: 'make-or-buy' },
   { input: 'Anbieter auswählen', threadId: 'entscheidung', variantId: 'anbieterauswahl' },
   { input: 'Welches Tool sollen wir auswählen?', threadId: 'entscheidung', variantId: 'anbieterauswahl' },
   { input: 'Vendor Selection für eine GenAI-Plattform', threadId: 'entscheidung', variantId: 'anbieterauswahl' },
@@ -36,6 +38,7 @@ const CASES: Case[] = [
   { input: 'Woran erkennen Sie einen geeigneten KI-Use-Case?', threadId: 'ki-eignung' },
   { input: 'Use Case Assessment vor dem Pilot', threadId: 'ki-eignung' },
   { input: 'Wann ist KI für diesen Prozess sinnvoll?', threadId: 'ki-eignung' },
+  { input: 'Sollen wir KI nutzen oder nicht?', threadId: 'ki-eignung' },
   { input: 'Was ist der Unterschied zwischen Pilot und MVP?', threadId: 'vergleich' },
   { input: 'Agil oder klassisch: Wann setzen Sie welchen Ansatz ein?', threadId: 'vergleich' },
   { input: 'Pilot oder Direktrollout: Was passt wann?', threadId: 'vergleich' },
@@ -96,6 +99,12 @@ describe('resolved answer paths', () => {
 
   it('marks an unrelated short fragment as weak evidence', () => {
     const result = classifyQuestion('operatives Thema', { feedback: [] })
+    expect(result.evidence).toBe('weak')
+  })
+
+  it('does not turn a single generic Nutzen token into KI-Eignung evidence', () => {
+    const result = classifyQuestion('Nutzen', { feedback: [] })
+    expect(result.primary.thread.id).not.toBe('ki-eignung')
     expect(result.evidence).toBe('weak')
   })
 })
