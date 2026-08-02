@@ -114,9 +114,12 @@ function scoreAntiCues(input: string, cues: Cue[]): number {
 }
 
 function exampleScore(input: string, examples: string[]): { score: number; similarity: number } {
+  const inputTokens = new Set(tokenize(input))
   const similarities = examples.map((example) => {
+    const exampleTokens = new Set(tokenize(example))
+    const sharedTokenCount = [...inputTokens].filter((token) => exampleTokens.has(token)).length
     const jaccard = jaccardSimilarity(input, example)
-    const shortInputCoverage = inputCoverage(input, example)
+    const shortInputCoverage = sharedTokenCount >= 2 ? inputCoverage(input, example) : 0
     return Math.max(jaccard, shortInputCoverage * 0.78)
   })
   const similarity = Math.max(...similarities, 0)
