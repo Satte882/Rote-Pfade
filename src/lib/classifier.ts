@@ -43,6 +43,79 @@ const CHOICE_FILLER_TOKENS = new Set([
   'nicht',
 ])
 
+const LOCAL_OPERATION_TERMS = [
+  'lokal',
+  'lokale llm',
+  'on premise',
+  'on prem',
+  'self hosted',
+  'self hosting',
+  'selbst hosten',
+  'selbst betreiben',
+  'eigenbetrieb',
+  'eigene infrastruktur',
+]
+
+const MANAGED_OPERATION_TERMS = [
+  'cloud',
+  'saas',
+  'managed',
+  'managed service',
+  'hosted',
+  'zukauf',
+  'kaufen',
+  'fremdbezug',
+]
+
+const PROVIDER_TOOL_TERMS = [
+  'openai',
+  'chatgpt',
+  'claude',
+  'anthropic',
+  'gemini',
+  'google gemini',
+  'copilot',
+  'microsoft copilot',
+  'mistral',
+  'le chat',
+  'langdock',
+  'meingpt',
+  'mein gpt',
+  'librechat',
+  'open webui',
+  'openrouter',
+  'perplexity',
+  'qwen',
+  'kimi',
+  'grok',
+]
+
+const COMPARISON_OPTION_TERMS = [
+  'pilot',
+  'mvp',
+  'proof of concept',
+  'poc',
+  'agil',
+  'klassisch',
+]
+
+const AI_OPTION_TERMS = [
+  'ki',
+  'künstliche intelligenz',
+  'genai',
+  'generative ai',
+  'llm',
+  'machine learning',
+]
+
+const NON_AI_ALTERNATIVE_TERMS = [
+  'automatisierung',
+  'klassische automatisierung',
+  'regelbasiert',
+  'rpa',
+  'prozessverbesserung',
+]
+
 export const threads = (Object.values(threadModules) as InterviewThread[]).sort(
   (left, right) => THREAD_ORDER.indexOf(left.id) - THREAD_ORDER.indexOf(right.id),
 )
@@ -61,6 +134,15 @@ type VariantScore = {
 
 type ClassifyOptions = {
   feedback?: FeedbackEntry[]
+}
+
+type CompactChoiceRoute = 'entscheidung' | 'make-or-buy' | 'anbieterauswahl' | 'vergleich' | 'ki-eignung'
+
+type CompactChoice = {
+  left: string
+  right: string
+  route: CompactChoiceRoute
+  explicitSeparator: boolean
 }
 
 function tokenCoverage(input: string, reference: string): number {
@@ -143,36 +225,144 @@ function hasConcreteChoiceSide(value: string): boolean {
   return tokenize(value).some((token) => !CHOICE_FILLER_TOKENS.has(token))
 }
 
-function structuralThreadScore(input: string, thread: InterviewThread): CueScore {
-  if (thread.id !== 'entscheidung') return { score: 0, matches: [] }
+function containsChoiceTerm(value: string, terms: string[]): boolean {
+  const valueTokens = new Set(tokenize(value))
+  if (valueTokens.size === 0) return false
 
+  return terms.some((term) => {
+    const termTokens = [...new Set(tokenize(term))]
+    return termTokens.length > 0 && termTokens.every((token) => valueTokens.has(token))
+  })
+}
+
+function classifyChoiceRoute(left: string, right: string): CompactChoiceRoute {
+  const leftLocal = containsChoiceTerm(left, LOCAL_OPERATION_TERMS)
+  const rightLocal = containsChoiceTerm(right, LOCAL_OPERATION_TERMS)
+  const leftManaged = containsChoiceTerm(left, MANAGED_OPERATION_TERMS)
+  const rightManaged = containsChoiceTerm(right, MANAGED_OPERATION_TERMS)
+  const leftProvider = containsChoiceTerm(left, PROVIDER_TOOL_TERMS)
+  const rightProvider = containsChoiceTerm(right, PROVIDER_TOOL_TERMS)
+  const leftComparison = containsChoiceTerm(left, COMPARISON_OPTION_TERMS)
+  const rightComparison = containsChoiceTerm(right, COMPARISON_OPTION_TERMS)
+  const leftAi = containsChoiceTerm(left, AI_OPTION_TERMS)
+  const rightAi = containsChoiceTerm(right, AI_OPTION_TERMS)
+  const leftAlternative = containsChoiceTerm(left, NON_AI_ALTERNATIVE_TERMS)
+  const rightAlternative = containsChoiceTerm(right, NON_AI_ALTERNATIVE_TERMS)
+
+  if (leftComparison && rightComparison) return 'vergleich'
+
+  if (
+    (leftLocal && (rightManaged || rightProvider))
+    || (rightLocal && (leftManaged || leftProvider))
+  ) {
+    return 'make-or-buy'
+  }
+
+  if (leftProvider && rightProvider) return 'anbieterauswahl'
+
+  if ((leftAi && rightAlternative) || (rightAi && leftAlternative)) {
+    return 'ki-eignung'
+  }
+
+  return 'entscheidung'
+}
+
+function splitExplicitChoice(input: string): [string, string] | undefined {
+  const parts = input
+    .trim()
+    .split(/\s+(?:oder|vs\.?|versus)\s+|\s*\/\s*/i)
+    .map((part) => normalizeText(part))
+    .filter(Boolean)
+
+  return parts.length === 2 ? [parts[0], parts[1]] : undefined
+}
+
+function detectKnownBareChoice(input: string): CompactChoice | undefined {
   const normalized = normalizeText(input)
-  if (!/^(sollen|sollten) wir\b/.test(normalized) || !/\boder\b/.test(normalized)) {
-    return { score: 0, matches: [] }
+  const words = normalized.split(' ').filter(Boolean)
+  if (words.length < 2 || words.length > 6) return undefined
+
+  for (let index = 1; index < words.length; index += 1) {
+    const left = words.slice(0, index).join(' ')
+    const right = words.slice(index).join(' ')
+    const route = classifyChoiceRoute(left, right)
+
+    if (route !== 'entscheidung') {
+      return { left, right, route, explicitSeparator: false }
+    }
   }
 
-  const [left, ...rightParts] = normalized.split(/\boder\b/)
-  const leftOption = left.replace(/^(sollen|sollten) wir\s+/, '')
-  const rightOption = rightParts.join(' oder ')
+  return undefined
+}
 
-  if (!hasConcreteChoiceSide(leftOption) || !hasConcreteChoiceSide(rightOption)) {
-    return { score: 0, matches: [] }
+function detectCompactChoice(input: string): CompactChoice | undefined {
+  const explicit = splitExplicitChoice(input)
+  if (explicit) {
+    const [left, right] = explicit
+    if (!hasConcreteChoiceSide(left) || !hasConcreteChoiceSide(right)) return undefined
+    return {
+      left,
+      right,
+      route: classifyChoiceRoute(left, right),
+      explicitSeparator: true,
+    }
   }
 
-  return { score: 6, matches: ['Auswahl zwischen zwei benannten Optionen'] }
+  return detectKnownBareChoice(input)
+}
+
+function structuralThreadScore(input: string, thread: InterviewThread): CueScore {
+  const choice = detectCompactChoice(input)
+  if (!choice) return { score: 0, matches: [] }
+
+  if (choice.route === 'vergleich' && thread.id === 'vergleich') {
+    return { score: 6, matches: ['Kurzer Vergleich zweier benannter Ansätze'] }
+  }
+
+  if (choice.route === 'ki-eignung' && thread.id === 'ki-eignung') {
+    return { score: 6, matches: ['KI gegenüber einer einfacheren Alternative'] }
+  }
+
+  if (
+    thread.id === 'entscheidung'
+    && ['entscheidung', 'make-or-buy', 'anbieterauswahl'].includes(choice.route)
+  ) {
+    return { score: 6, matches: ['Auswahl zwischen zwei benannten Optionen'] }
+  }
+
+  return { score: 0, matches: [] }
+}
+
+function structuralVariantScore(input: string, variant: ThreadVariant): CueScore {
+  const choice = detectCompactChoice(input)
+  if (!choice) return { score: 0, matches: [] }
+
+  if (choice.route === 'make-or-buy' && variant.id === 'make-or-buy') {
+    return { score: 7, matches: ['Managed, Cloud oder Anbieter gegenüber lokalem Betrieb'] }
+  }
+
+  if (choice.route === 'anbieterauswahl' && variant.id === 'anbieterauswahl') {
+    return { score: 7, matches: ['Auswahl zwischen zwei Anbietern oder Tools'] }
+  }
+
+  return { score: 0, matches: [] }
 }
 
 function rankVariant(input: string, variant: ThreadVariant): VariantScore {
   const positive = scoreCues(input, variant.cues)
+  const structural = structuralVariantScore(input, variant)
   const negative = scoreAntiCues(input, variant.antiCues)
   const examples = exampleScore(input, variant.examples)
   const reference = `${variant.name} ${variant.description} ${variant.steps.join(' ')}`
-  const score = Math.max(0, positive.score - negative + examples.score + referenceTokenScore(input, reference))
+  const score = Math.max(
+    0,
+    positive.score + structural.score - negative + examples.score + referenceTokenScore(input, reference),
+  )
 
   return {
     variant,
     score,
-    matches: positive.matches,
+    matches: [...new Set([...positive.matches, ...structural.matches])],
     exampleSimilarity: examples.similarity,
   }
 }
