@@ -29,6 +29,20 @@ const THREAD_ORDER = [
   'star-l',
 ]
 
+const CHOICE_FILLER_TOKENS = new Set([
+  'soll',
+  'sollt',
+  'nutz',
+  'verwend',
+  'einsetz',
+  'wahl',
+  'auswahl',
+  'entscheid',
+  'mach',
+  'tun',
+  'nicht',
+])
+
 export const threads = (Object.values(threadModules) as InterviewThread[]).sort(
   (left, right) => THREAD_ORDER.indexOf(left.id) - THREAD_ORDER.indexOf(right.id),
 )
@@ -110,10 +124,39 @@ function exampleScore(input: string, examples: string[]): { score: number; simil
 }
 
 function referenceTokenScore(input: string, reference: string): number {
-  const coverage = inputCoverage(input, reference)
-  const inputTokenCount = new Set(tokenize(input)).size
-  const cap = inputTokenCount <= 4 ? 1.8 : 1.2
+  const inputTokens = [...new Set(tokenize(input))]
+  const referenceTokens = new Set(tokenize(reference))
+  if (inputTokens.length === 0 || referenceTokens.size === 0) return 0
+
+  const matches = inputTokens.filter((token) => referenceTokens.has(token)).length
+  if (matches < 2) return 0
+
+  const coverage = matches / inputTokens.length
+  const cap = inputTokens.length <= 4 ? 1.8 : 1.2
   return Math.min(cap, coverage * cap)
+}
+
+function hasConcreteChoiceSide(value: string): boolean {
+  return tokenize(value).some((token) => !CHOICE_FILLER_TOKENS.has(token))
+}
+
+function structuralThreadScore(input: string, thread: InterviewThread): CueScore {
+  if (thread.id !== 'entscheidung') return { score: 0, matches: [] }
+
+  const normalized = normalizeText(input)
+  if (!/^(sollen|sollten) wir\b/.test(normalized) || !/\boder\b/.test(normalized)) {
+    return { score: 0, matches: [] }
+  }
+
+  const [left, ...rightParts] = normalized.split(/\boder\b/)
+  const leftOption = left.replace(/^(sollen|sollten) wir\s+/, '')
+  const rightOption = rightParts.join(' oder ')
+
+  if (!hasConcreteChoiceSide(leftOption) || !hasConcreteChoiceSide(rightOption)) {
+    return { score: 0, matches: [] }
+  }
+
+  return { score: 6, matches: ['Auswahl zwischen zwei benannten Optionen'] }
 }
 
 function rankVariant(input: string, variant: ThreadVariant): VariantScore {
@@ -143,6 +186,7 @@ function selectVariant(input: string, thread: InterviewThread): VariantScore | u
 
 function rankThread(input: string, thread: InterviewThread): Omit<RankedThread, 'matchPercent'> {
   const positive = scoreCues(input, thread.cues)
+  const structural = structuralThreadScore(input, thread)
   const negative = scoreAntiCues(input, thread.antiCues)
   const examples = exampleScore(input, thread.examples)
   const reference = `${thread.name} ${thread.description} ${thread.purpose} ${thread.steps.join(' ')}`
@@ -150,14 +194,23 @@ function rankThread(input: string, thread: InterviewThread): Omit<RankedThread, 
   const variantContribution = selectedVariant ? Math.min(4, selectedVariant.score * 0.38) : 0
   const rawScore = Math.max(
     0,
-    positive.score - negative + examples.score + referenceTokenScore(input, reference) + variantContribution,
+    positive.score
+      + structural.score
+      - negative
+      + examples.score
+      + referenceTokenScore(input, reference)
+      + variantContribution,
   )
 
   return {
     thread,
     selectedVariant: selectedVariant?.variant,
     rawScore,
-    matchedCues: [...new Set([...positive.matches, ...(selectedVariant?.matches ?? [])])].slice(0, 6),
+    matchedCues: [...new Set([
+      ...positive.matches,
+      ...structural.matches,
+      ...(selectedVariant?.matches ?? []),
+    ])].slice(0, 6),
     exampleSimilarity: Math.max(examples.similarity, selectedVariant?.exampleSimilarity ?? 0),
   }
 }
