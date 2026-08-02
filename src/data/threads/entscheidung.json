@@ -48,8 +48,7 @@
     "Wie wählen Sie zwischen zwei geeigneten Lösungsanbietern?",
     "Wie entscheiden Sie, ob ein Pilot fortgeführt oder beendet wird?",
     "Welche Lösung würden Sie dem Management empfehlen?",
-    "Sollten wir die Lösung intern entwickeln oder als Produkt zukaufen?",
-    "Sollen wir eine Managed-Plattform oder lokale LLMs nutzen?"
+    "Sollten wir die Lösung intern entwickeln oder als Produkt zukaufen?"
   ],
   "opening": "Für {topic} definiere ich zuerst die entscheidungsrelevanten Kriterien, bevor ich die Optionen bewerte und eine Empfehlung abgebe.",
   "relatedIds": ["entscheidung-unsicherheit", "priorisierung", "ki-eignung"],
