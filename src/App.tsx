@@ -46,7 +46,7 @@ export default function App() {
   return (
     <div className={`app-shell layout-${layout}`}>
       <header className="compact-header">
-        <button className="brand-button" type="button" onClick={() => selectTab('analyse')}>
+        <button className="brand-button" type="button" onClick={() => window.location.reload()}>
           <span aria-hidden="true">RP</span>
           <strong>Rote Pfade</strong>
         </button>
