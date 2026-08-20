@@ -29,6 +29,9 @@
     { "text": "sollten wir ki", "weight": 6 },
     { "text": "datenverfügbarkeit", "weight": 3 },
     { "text": "technische machbarkeit", "weight": 3 },
+    { "text": "trainingsdaten", "weight": 5 },
+    { "text": "zielmarkt", "weight": 5 },
+    { "text": "repräsentativ", "weight": 5 },
     { "text": "use case", "weight": 3 },
     { "text": "anwendungsfall", "weight": 3 },
     { "text": "vor dem pilot bewerten", "weight": 5 }

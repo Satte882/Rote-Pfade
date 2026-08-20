@@ -21,22 +21,70 @@ const EXACT_ROUTING_CASES = [
 ]
 
 const DIAGNOSTIC_CASES = [
-  'Zwei Use Cases: einer mit riesigem theoretischem Potenzial, aber unklarer Datenlage – einer kleiner, aber klar validierbar. Welchen wählen Sie?',
-  'Ein Fachbereich blockiert die Einführung eines neuen KI-Tools. Wie gehen Sie vor?',
-  'Ein KI-Modell trifft automatisierte Entscheidungen mit Kundenauswirkung. Wie viel Kontrolle braucht es?',
-  'Der Pilot war in einer Region erfolgreich. Rollen Sie ihn sofort global aus?',
-  'Die Trainingsdaten stammen aus einem anderen Land als dem Zielmarkt. Problem?',
-  'Wer haftet, wenn ein KI-System eine Fehlentscheidung trifft?',
-  'Ein Vorstand will "KI überall" ohne konkreten Business Case. Reaktion?',
-  'Ihr Pilot läuft seit 3 Monaten "stabil" ohne Abbruchkriterium. Was fehlt?',
-  'Sie haben Budget für nur einen von drei Use Cases. Entscheidungskriterium?',
-  'Mitarbeitende sabotieren passiv ein neues Tool durch Nichtnutzung. Ursache zuerst klären wie?',
-  'Ein GenAI-Agent darf automatisch E-Mails an Kunden versenden. Zustimmung?',
-  'Funktioniert ein Prozess, der im Pilot mit 50 Nutzern lief, auch bei 5.000?',
-  'Die Daten sind vollständig, aber für einen anderen Zweck erhoben. Nutzbar?',
-  'Wie regeln Sie Verantwortlichkeiten zwischen IT, Fachbereich und Compliance bei einem KI-Projekt?',
-  'Ein Use Case hat hohe strategische Sichtbarkeit, aber schwache Erfolgsaussicht. Priorität?',
-  'Ein Team lehnt die Automatisierung ab, weil sie Kontrollverlust fürchtet. Erster Schritt?',
+  {
+    input: 'Zwei Use Cases: einer mit riesigem theoretischem Potenzial, aber unklarer Datenlage – einer kleiner, aber klar validierbar. Welchen wählen Sie?',
+    acceptableThreadIds: ['priorisierung', 'entscheidung-unsicherheit'],
+  },
+  {
+    input: 'Ein Fachbereich blockiert die Einführung eines neuen KI-Tools. Wie gehen Sie vor?',
+    acceptableThreadIds: ['stakeholder-change', 'stakeholder-konflikt'],
+  },
+  {
+    input: 'Ein KI-Modell trifft automatisierte Entscheidungen mit Kundenauswirkung. Wie viel Kontrolle braucht es?',
+    acceptableThreadIds: ['risiko-governance', 'entscheidung'],
+  },
+  {
+    input: 'Der Pilot war in einer Region erfolgreich. Rollen Sie ihn sofort global aus?',
+    acceptableThreadIds: ['skalierung', 'wirkung'],
+  },
+  {
+    input: 'Die Trainingsdaten stammen aus einem anderen Land als dem Zielmarkt. Problem?',
+    acceptableThreadIds: ['ki-eignung', 'risiko-governance'],
+  },
+  {
+    input: 'Wer haftet, wenn ein KI-System eine Fehlentscheidung trifft?',
+    acceptableThreadIds: ['risiko-governance'],
+  },
+  {
+    input: 'Ein Vorstand will "KI überall" ohne konkreten Business Case. Reaktion?',
+    acceptableThreadIds: ['strategie-zielbild', 'ki-eignung'],
+  },
+  {
+    input: 'Ihr Pilot läuft seit 3 Monaten "stabil" ohne Abbruchkriterium. Was fehlt?',
+    acceptableThreadIds: ['entscheidung', 'skalierung'],
+  },
+  {
+    input: 'Sie haben Budget für nur einen von drei Use Cases. Entscheidungskriterium?',
+    acceptableThreadIds: ['priorisierung'],
+  },
+  {
+    input: 'Mitarbeitende sabotieren passiv ein neues Tool durch Nichtnutzung. Ursache zuerst klären wie?',
+    acceptableThreadIds: ['stakeholder-change', 'problem-stoerung'],
+  },
+  {
+    input: 'Ein GenAI-Agent darf automatisch E-Mails an Kunden versenden. Zustimmung?',
+    acceptableThreadIds: ['risiko-governance'],
+  },
+  {
+    input: 'Funktioniert ein Prozess, der im Pilot mit 50 Nutzern lief, auch bei 5.000?',
+    acceptableThreadIds: ['skalierung'],
+  },
+  {
+    input: 'Die Daten sind vollständig, aber für einen anderen Zweck erhoben. Nutzbar?',
+    acceptableThreadIds: ['ki-eignung'],
+  },
+  {
+    input: 'Wie regeln Sie Verantwortlichkeiten zwischen IT, Fachbereich und Compliance bei einem KI-Projekt?',
+    acceptableThreadIds: ['risiko-governance', 'stakeholder-konflikt'],
+  },
+  {
+    input: 'Ein Use Case hat hohe strategische Sichtbarkeit, aber schwache Erfolgsaussicht. Priorität?',
+    acceptableThreadIds: ['priorisierung'],
+  },
+  {
+    input: 'Ein Team lehnt die Automatisierung ab, weil sie Kontrollverlust fürchtet. Erster Schritt?',
+    acceptableThreadIds: ['stakeholder-change'],
+  },
 ]
 
 describe('management interview routing guards', () => {
@@ -47,22 +95,13 @@ describe('management interview routing guards', () => {
 })
 
 describe('management interview diagnostic cases', () => {
-  it.each(DIAGNOSTIC_CASES)('%s returns a usable routing set', (input) => {
+  it.each(DIAGNOSTIC_CASES)('$input surfaces a useful answer path', ({ input, acceptableThreadIds }) => {
     const result = classifyQuestion(input, { feedback: [] })
     const routingSet = [result.primary, ...result.alternatives]
+    const routingIds = routingSet.map((entry) => entry.thread.id)
 
-    console.info('[management-routing]', JSON.stringify({
-      input,
-      evidence: result.evidence,
-      routes: routingSet.map((entry) => ({
-        threadId: entry.thread.id,
-        matchPercent: entry.matchPercent,
-      })),
-    }))
-
-    expect(result.primary.thread.id).toBeTruthy()
     expect(routingSet.length).toBe(3)
-    expect(new Set(routingSet.map((entry) => entry.thread.id)).size).toBe(3)
-    expect(['clear', 'ambiguous', 'weak']).toContain(result.evidence)
+    expect(new Set(routingIds).size).toBe(3)
+    expect(routingIds.some((threadId) => acceptableThreadIds.includes(threadId))).toBe(true)
   })
 })
