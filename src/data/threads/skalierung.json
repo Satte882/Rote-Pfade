@@ -25,8 +25,6 @@
     { "text": "ausweitung", "weight": 8 },
     { "text": "ausweiten", "weight": 7 },
     { "text": "pilotnutzer", "weight": 6 },
-    { "text": "weitere nutzer", "weight": 5 },
-    { "text": "mehr nutzer", "weight": 5 },
     { "text": "nutzerzahl", "weight": 4 },
     { "text": "scale up", "weight": 7 },
     { "text": "erfolgreichen piloten", "weight": 4 },
@@ -51,8 +49,7 @@
     "Wie kommen Sie vom MVP in einen stabilen produktiven Betrieb?",
     "Wie führen Sie eine KI-Lösung unternehmensweit ein?",
     "Was muss vor einem breiten Rollout geklärt sein?",
-    "Wie gehen Sie vor, wenn der Pilotnutzen für eine Skalierung noch nicht belastbar ist?",
-    "Was prüfen Sie vor der Ausweitung eines Piloten auf deutlich mehr Nutzer?"
+    "Wie gehen Sie vor, wenn der Pilotnutzen für eine Skalierung noch nicht belastbar ist?"
   ],
   "opening": "Für {topic} prüfe ich zuerst, ob Nutzen und Skalierungsreife ein belastbares Gate erfüllen. Ohne diesen Nachweis wird nachgeschärft, zurück in den Pilot gegangen oder gestoppt.",
   "relatedIds": ["stakeholder-change", "wirkung", "risiko-governance", "strategie-zielbild"]
