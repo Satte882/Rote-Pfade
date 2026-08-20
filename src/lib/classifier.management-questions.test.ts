@@ -51,6 +51,15 @@ describe('management interview diagnostic cases', () => {
     const result = classifyQuestion(input, { feedback: [] })
     const routingSet = [result.primary, ...result.alternatives]
 
+    console.info('[management-routing]', JSON.stringify({
+      input,
+      evidence: result.evidence,
+      routes: routingSet.map((entry) => ({
+        threadId: entry.thread.id,
+        matchPercent: entry.matchPercent,
+      })),
+    }))
+
     expect(result.primary.thread.id).toBeTruthy()
     expect(routingSet.length).toBe(3)
     expect(new Set(routingSet.map((entry) => entry.thread.id)).size).toBe(3)
