@@ -1,0 +1,191 @@
+.answer-guide-kicker,
+.answer-guide-checkpoint > span,
+.answer-guide-path > span,
+.spoken-schema-strip > span,
+.library-checkpoint > span,
+.library-conversation-path > span,
+.library-detailed-path > span {
+  color: var(--accent);
+  font-size: .76rem;
+  font-weight: 750;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+
+.final-answer-result {
+  display: grid;
+  gap: 12px;
+}
+
+.final-answer-result > h1 {
+  margin-bottom: 0;
+}
+
+.answer-guide-checkpoint,
+.practice-checkpoint,
+.library-checkpoint {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid rgba(69, 98, 122, .52);
+  border-left: 4px solid #45627a;
+  border-radius: 8px;
+  background: rgba(20, 34, 49, .72);
+}
+
+.answer-guide-checkpoint strong,
+.practice-checkpoint > strong,
+.library-checkpoint strong {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.answer-guide-path,
+.practice-conversation-steps,
+.library-conversation-path,
+.library-detailed-path {
+  display: grid;
+  gap: 7px;
+}
+
+.conversation-path {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.conversation-path li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid rgba(69, 98, 122, .36);
+  border-radius: 8px;
+  background: rgba(10, 16, 23, .58);
+}
+
+.conversation-path li > span {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #45627a;
+  border-radius: 50%;
+  color: var(--accent);
+  font-size: .74rem;
+  font-weight: 750;
+}
+
+.conversation-path li > strong {
+  font-size: .96rem;
+  line-height: 1.2;
+}
+
+.spoken-schema-strip {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid rgba(69, 98, 122, .42);
+  border-radius: 8px;
+  background: var(--accent-bg);
+}
+
+.spoken-schema-strip strong {
+  font-size: .92rem;
+  line-height: 1.35;
+}
+
+.practice-answer-guide {
+  display: grid;
+  gap: 12px;
+}
+
+.practice-checkpoint .management-stage-label,
+.practice-conversation-steps .management-stage-label {
+  margin: 0;
+}
+
+.management-background {
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(10, 16, 23, .4);
+}
+
+.management-background summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+.management-background > div {
+  display: grid;
+  gap: 6px;
+  padding-top: 9px;
+}
+
+.management-background p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.checkpoint-anchor {
+  border-color: rgba(69, 98, 122, .55);
+  background: rgba(20, 34, 49, .72);
+}
+
+.checkpoint-anchor h3 {
+  line-height: 1.4;
+}
+
+.learning-conversation-path {
+  margin-top: 2px;
+}
+
+.management-background-card h3 {
+  margin: 0;
+}
+
+.final-thread-body {
+  display: grid;
+  gap: 12px;
+}
+
+.library-checkpoint,
+.library-conversation-path,
+.library-detailed-path {
+  margin: 0;
+}
+
+.library-conversation-path ol,
+.library-detailed-path ol {
+  margin: 0;
+  padding-left: 1.35rem;
+}
+
+.library-conversation-path li {
+  margin: 4px 0;
+  font-weight: 700;
+}
+
+.library-detailed-path li {
+  margin: 4px 0;
+  color: var(--muted);
+}
+
+.recognition-examples {
+  padding-top: 0;
+}
+
+@media (max-width: 760px) {
+  .conversation-path {
+    grid-template-columns: 1fr;
+  }
+}

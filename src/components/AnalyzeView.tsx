@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
-import { classifyQuestion, getResolvedName, getResolvedSteps, threads } from '../lib/classifier'
+import { getAnswerGuide } from '../data/answer-guides'
+import { classifyQuestion, getResolvedName, threads } from '../lib/classifier'
 import { saveFeedback } from '../lib/storage'
 import type { ClassificationResult, FeedbackEntry } from '../types/thread'
 
@@ -85,6 +86,8 @@ export function AnalyzeView({ onFeedbackSaved }: { onFeedbackSaved: () => void }
     focusInput()
   }
 
+  const guide = result ? getAnswerGuide(result.primary.thread.id) : null
+
   return (
     <section className="sidecar-view" aria-label="Roten Faden erkennen">
       <div className="input-zone">
@@ -121,17 +124,32 @@ export function AnalyzeView({ onFeedbackSaved }: { onFeedbackSaved: () => void }
         {error && <p className="error-message" role="alert">{error}</p>}
       </div>
 
-      {result && (
-        <section className="compact-result" aria-live="polite">
+      {result && guide && (
+        <section className="compact-result final-answer-result" aria-live="polite">
+          <span className="answer-guide-kicker">Roter Pfad</span>
           <h1>{getResolvedName(result.primary)}</h1>
-          <ol className="numbered-path">
-            {getResolvedSteps(result.primary).map((step, index) => (
-              <li className="numbered-step" key={step}>
-                <span aria-hidden="true">{index + 1}</span>
-                <strong>{step}</strong>
-              </li>
-            ))}
-          </ol>
+
+          <div className="answer-guide-checkpoint">
+            <span>Entscheidender Prüfpunkt</span>
+            <strong>{guide.checkpoint}</strong>
+          </div>
+
+          <div className="answer-guide-path">
+            <span>Schritte – daran entlang denken</span>
+            <ol className="conversation-path">
+              {guide.conversationSteps.map((step, index) => (
+                <li key={step}>
+                  <span aria-hidden="true">{index + 1}</span>
+                  <strong>{step}</strong>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div className="spoken-schema-strip">
+            <span>Sprechen</span>
+            <strong>Position → Begründung / Trade-off → Konsequenz → STOP</strong>
+          </div>
 
           <details className={`compact-details evidence-${result.evidence}`}>
             <summary>{evidenceLabel(result)}</summary>
