@@ -8,7 +8,7 @@
 .management-stage-label,
 .learning-kicker {
   color: var(--accent);
-  font-size: .64rem;
+  font-size: .82rem;
   font-weight: 750;
   letter-spacing: .04em;
   text-transform: uppercase;
@@ -102,13 +102,13 @@
 .learning-anchor p {
   margin: 0;
   color: var(--muted);
-  font-size: .72rem;
+  font-size: .96rem;
   line-height: 1.45;
 }
 
 .learning-content {
   display: grid;
-  gap: 10px;
+  gap: 14px;
   padding-top: 8px;
   border-top: 1px solid var(--border);
 }
@@ -131,7 +131,7 @@
 
 .learning-anchor h3 {
   margin: 0;
-  font-size: .8rem;
+  font-size: 1rem;
   line-height: 1.3;
 }
 
@@ -139,18 +139,23 @@
   padding-top: 5px;
   border-top: 1px solid var(--border);
   color: var(--text);
-  font-size: .7rem;
+  font-size: .9rem;
   line-height: 1.4;
 }
 
 .learning-section {
   display: grid;
-  gap: 5px;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(17, 24, 32, .72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .02);
 }
 
 .learning-steps {
   display: grid;
-  gap: 5px;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -159,10 +164,12 @@
 .learning-steps li {
   display: grid;
   grid-template-columns: 22px minmax(0, 1fr);
-  gap: 7px;
+  gap: 10px;
   align-items: start;
-  padding: 7px 0;
-  border-bottom: 1px solid var(--border);
+  padding: 10px 12px;
+  border: 1px solid rgba(69, 98, 122, .34);
+  border-radius: 8px;
+  background: rgba(10, 16, 23, .55);
 }
 
 .learning-step-index {
@@ -173,13 +180,13 @@
   border: 1px solid #45627a;
   border-radius: 50%;
   color: var(--accent);
-  font-size: .62rem;
+  font-size: .78rem;
   font-weight: 750;
 }
 
 .learning-steps strong {
   display: block;
-  font-size: .73rem;
+  font-size: .98rem;
 }
 
 .learning-steps p {
@@ -187,8 +194,10 @@
 }
 
 .learning-position {
-  padding: 8px;
-  border-left: 2px solid #45627a;
+  padding: 12px 14px;
+  border: 1px solid rgba(69, 98, 122, .5);
+  border-left: 4px solid #45627a;
+  border-radius: 8px;
   background: var(--accent-bg);
 }
 
@@ -203,45 +212,47 @@
 .learning-related {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 5px;
+  gap: 8px;
 }
 
 .learning-related > div {
   display: grid;
-  gap: 2px;
-  padding: 7px;
+  gap: 4px;
+  padding: 10px 12px;
   border: 1px solid var(--border);
-  border-radius: 5px;
+  border-radius: 8px;
+  background: rgba(10, 16, 23, .5);
 }
 
 .learning-related strong {
-  font-size: .69rem;
+  font-size: .9rem;
 }
 
 .learning-related span {
   color: var(--muted);
-  font-size: .64rem;
+  font-size: .84rem;
   line-height: 1.35;
 }
 
 .learning-memory {
   display: grid;
-  gap: 2px;
-  padding: 8px;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid rgba(69, 98, 122, .45);
+  border-radius: 8px;
+  background: rgba(20, 34, 49, .72);
 }
 
 .learning-memory span {
   color: var(--accent);
-  font-size: .6rem;
+  font-size: .78rem;
   font-weight: 750;
   letter-spacing: .05em;
   text-transform: uppercase;
 }
 
 .learning-memory strong {
-  font-size: .76rem;
+  font-size: .98rem;
   line-height: 1.35;
 }
 

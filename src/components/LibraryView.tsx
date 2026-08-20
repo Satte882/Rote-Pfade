@@ -36,7 +36,7 @@ export function LibraryView() {
   }, [category, query])
 
   return (
-    <section className="view" aria-labelledby="library-title">
+    <section className="view library-view" aria-labelledby="library-title">
       <div className="section-heading split-heading">
         <div>
           <p className="eyebrow">Nachschlagewerk</p>

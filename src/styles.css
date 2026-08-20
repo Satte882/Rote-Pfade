@@ -336,6 +336,38 @@ input, select { min-height: 34px; padding: 7px 8px; }
 .example-list p { margin: 0; color: var(--muted); line-height: 1.35; }
 .empty-state { color: var(--muted); font-size: .75rem; }
 
+.training-view .section-heading h1,
+.library-view .section-heading h1 { font-size: 1.28rem; }
+
+.training-view .section-heading p:not(.eyebrow),
+.library-view .section-heading p:not(.eyebrow) { font-size: .96rem; }
+
+.training-view .eyebrow,
+.library-view .eyebrow { font-size: .8rem; }
+
+.training-view .training-stats span,
+.library-view .thread-count span { font-size: .88rem; }
+
+.training-view .training-stats strong,
+.library-view .thread-count strong { font-size: 1.12rem; }
+
+.training-view .question-label { font-size: .86rem; }
+.training-view .training-card > h2 { font-size: 1.12rem; }
+.training-view .training-option strong { font-size: 1rem; }
+.training-view .training-option span { font-size: .9rem; }
+.training-view .training-feedback { font-size: .96rem; }
+
+.library-view .library-tools label > span { font-size: .92rem; }
+.library-view .filter-chip { font-size: .86rem; }
+.library-view .thread-index { font-size: .8rem; }
+.library-view .thread-heading small { font-size: .78rem; }
+.library-view .thread-heading strong { font-size: 1rem; }
+.library-view .thread-heading > span { font-size: .9rem; }
+.library-view .thread-card-body { font-size: .98rem; }
+.library-view .thread-purpose span,
+.library-view .example-list > span { font-size: .8rem; }
+.library-view .empty-state { font-size: .96rem; }
+
 .visually-hidden {
   position: absolute !important;
   width: 1px !important;

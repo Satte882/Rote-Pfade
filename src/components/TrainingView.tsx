@@ -77,7 +77,7 @@ export function TrainingView({ dataVersion }: { dataVersion: number }) {
   }
 
   return (
-    <section className="view" aria-labelledby="training-title">
+    <section className="view training-view" aria-labelledby="training-title">
       <div className="section-heading split-heading training-heading">
         <div>
           <p className="eyebrow">Management-Training</p>
