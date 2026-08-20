@@ -3,7 +3,14 @@ import type { ExportPayload, FeedbackEntry, TrainingStats } from '../types/threa
 const FEEDBACK_KEY = 'rote-pfade.feedback.v1'
 const TRAINING_KEY = 'rote-pfade.training.v1'
 
-const emptyStats = (): TrainingStats => ({ answered: 0, correct: 0, byThread: {} })
+const emptyStats = (): TrainingStats => ({
+  answered: 0,
+  correct: 0,
+  byThread: {},
+  leverAnswered: 0,
+  leverCorrect: 0,
+  byLever: {},
+})
 
 function hasLocalStorage(): boolean {
   return typeof localStorage !== 'undefined'
@@ -15,6 +22,22 @@ function safeParse<T>(value: string | null, fallback: T): T {
     return JSON.parse(value) as T
   } catch {
     return fallback
+  }
+}
+
+function asNonNegativeNumber(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : 0
+}
+
+function normalizeTrainingStats(value: Partial<TrainingStats> | null | undefined): TrainingStats {
+  if (!value) return emptyStats()
+  return {
+    answered: asNonNegativeNumber(value.answered),
+    correct: asNonNegativeNumber(value.correct),
+    byThread: value.byThread && typeof value.byThread === 'object' ? value.byThread : {},
+    leverAnswered: asNonNegativeNumber(value.leverAnswered),
+    leverCorrect: asNonNegativeNumber(value.leverCorrect),
+    byLever: value.byLever && typeof value.byLever === 'object' ? value.byLever : {},
   }
 }
 
@@ -47,13 +70,15 @@ export function saveFeedback(entry: FeedbackEntry): FeedbackEntry[] {
 
 export function loadTrainingStats(): TrainingStats {
   if (!hasLocalStorage()) return emptyStats()
-  return safeParse<TrainingStats>(localStorage.getItem(TRAINING_KEY), emptyStats())
+  const parsed = safeParse<Partial<TrainingStats>>(localStorage.getItem(TRAINING_KEY), {})
+  return normalizeTrainingStats(parsed)
 }
 
-export function saveTrainingAnswer(threadId: string, correct: boolean): TrainingStats {
+export function saveThreadTrainingAnswer(threadId: string, correct: boolean): TrainingStats {
   const current = loadTrainingStats()
   const threadStats = current.byThread[threadId] ?? { answered: 0, correct: 0 }
   const next: TrainingStats = {
+    ...current,
     answered: current.answered + 1,
     correct: current.correct + (correct ? 1 : 0),
     byThread: {
@@ -66,6 +91,29 @@ export function saveTrainingAnswer(threadId: string, correct: boolean): Training
   }
   if (hasLocalStorage()) localStorage.setItem(TRAINING_KEY, JSON.stringify(next))
   return next
+}
+
+export function saveLeverTrainingAnswer(leverId: string, correct: boolean): TrainingStats {
+  const current = loadTrainingStats()
+  const leverStats = current.byLever[leverId] ?? { answered: 0, correct: 0 }
+  const next: TrainingStats = {
+    ...current,
+    leverAnswered: current.leverAnswered + 1,
+    leverCorrect: current.leverCorrect + (correct ? 1 : 0),
+    byLever: {
+      ...current.byLever,
+      [leverId]: {
+        answered: leverStats.answered + 1,
+        correct: leverStats.correct + (correct ? 1 : 0),
+      },
+    },
+  }
+  if (hasLocalStorage()) localStorage.setItem(TRAINING_KEY, JSON.stringify(next))
+  return next
+}
+
+export function saveTrainingAnswer(threadId: string, correct: boolean): TrainingStats {
+  return saveThreadTrainingAnswer(threadId, correct)
 }
 
 export function createExportPayload(): ExportPayload {
@@ -98,8 +146,13 @@ export async function importExport(file: File): Promise<ExportPayload> {
 
   if (!hasLocalStorage()) throw new Error('Lokaler Browserspeicher ist nicht verfügbar.')
   localStorage.setItem(FEEDBACK_KEY, JSON.stringify(parsed.feedback))
-  localStorage.setItem(TRAINING_KEY, JSON.stringify(parsed.trainingStats))
-  return parsed as ExportPayload
+  localStorage.setItem(TRAINING_KEY, JSON.stringify(normalizeTrainingStats(parsed.trainingStats)))
+  return {
+    schemaVersion: 1,
+    exportedAt: parsed.exportedAt ?? new Date().toISOString(),
+    feedback: parsed.feedback,
+    trainingStats: normalizeTrainingStats(parsed.trainingStats),
+  }
 }
 
 export function clearLocalData(): void {

@@ -65,10 +65,28 @@ export type FeedbackEntry = {
   createdAt: string
 }
 
+export type ManagementLever = {
+  id: string
+  name: string
+  principle: string
+  description: string
+}
+
+export type ManagementTrainingCase = {
+  prompt: string
+  threadId: string
+  variantId?: string
+  leverId: string
+  rationale: string
+}
+
 export type TrainingStats = {
   answered: number
   correct: number
   byThread: Record<string, { answered: number; correct: number }>
+  leverAnswered: number
+  leverCorrect: number
+  byLever: Record<string, { answered: number; correct: number }>
 }
 
 export type ExportPayload = {

@@ -1,0 +1,51 @@
+.management-training-stage {
+  display: grid;
+  gap: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+}
+
+.management-stage-label {
+  color: var(--accent);
+  font-size: .64rem;
+  font-weight: 750;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.management-stage-prompt {
+  margin: 0;
+  color: var(--muted);
+  font-size: .72rem;
+}
+
+.management-lever-options {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.management-check {
+  padding: 6px 8px;
+  border-left: 2px solid var(--border-strong);
+  background: var(--panel-soft);
+  font-size: .72rem;
+}
+
+.management-check.correct-check {
+  border-left-color: var(--success);
+}
+
+.management-check.wrong-check {
+  border-left-color: var(--danger);
+}
+
+.management-lever-description {
+  color: var(--muted);
+  font-size: .7rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .management-lever-options {
+    grid-template-columns: 1fr;
+  }
+}
