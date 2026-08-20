@@ -18,6 +18,18 @@ const EXACT_ROUTING_CASES = [
     input: 'Ihr Pilot zeigt gemischte Ergebnisse nach 6 Wochen. Verlängern oder stoppen?',
     expectedThreadId: 'entscheidung',
   },
+  {
+    input: 'Ein Prozess funktioniert mit 50 Pilotnutzern. Was prüfen Sie vor der Ausweitung auf 5.000 Nutzer?',
+    expectedThreadId: 'skalierung',
+  },
+  {
+    input: 'Funktioniert ein Prozess, der im Pilot mit 50 Nutzern lief, auch bei 5.000?',
+    expectedThreadId: 'skalierung',
+  },
+  {
+    input: 'Was müssen Sie vor der Ausweitung eines Piloten auf deutlich mehr Nutzer prüfen?',
+    expectedThreadId: 'skalierung',
+  },
 ]
 
 const DIAGNOSTIC_CASES = [
@@ -64,10 +76,6 @@ const DIAGNOSTIC_CASES = [
   {
     input: 'Ein GenAI-Agent darf automatisch E-Mails an Kunden versenden. Zustimmung?',
     acceptableThreadIds: ['risiko-governance'],
-  },
-  {
-    input: 'Funktioniert ein Prozess, der im Pilot mit 50 Nutzern lief, auch bei 5.000?',
-    acceptableThreadIds: ['skalierung'],
   },
   {
     input: 'Die Daten sind vollständig, aber für einen anderen Zweck erhoben. Nutzbar?',
