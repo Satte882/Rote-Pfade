@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { getAnswerGuide } from '../data/answer-guides'
 import { threads } from '../lib/classifier'
 
 export function LibraryView() {
@@ -15,6 +16,7 @@ export function LibraryView() {
     const normalizedQuery = query.trim().toLocaleLowerCase('de-DE')
     return threads.filter((thread) => {
       const matchesCategory = category === 'Alle' || thread.category === category
+      const guide = getAnswerGuide(thread.id)
       const variantText = thread.variants?.flatMap((variant) => [
         variant.name,
         variant.description,
@@ -27,6 +29,9 @@ export function LibraryView() {
         thread.description,
         thread.purpose,
         thread.mnemonic,
+        guide.checkpoint,
+        ...guide.conversationSteps,
+        ...guide.recognitionExamples,
         ...thread.steps,
         ...thread.examples,
         ...variantText,
@@ -41,7 +46,7 @@ export function LibraryView() {
         <div>
           <p className="eyebrow">Nachschlagewerk</p>
           <h1 id="library-title">Die {threads.length} roten Fäden</h1>
-          <p>Fäden und fachliche Varianten sind lesbar und durchsuchbar; Änderungen erfolgen kontrolliert im Repository.</p>
+          <p>Fragetyp erkennen, entscheidenden Prüfpunkt setzen und die Schritte als Antwortlogik abrufen.</p>
         </div>
         <div className="thread-count"><strong>{filteredThreads.length}</strong><span>angezeigt</span></div>
       </div>
@@ -53,7 +58,7 @@ export function LibraryView() {
             id="library-search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Name, Variante, Beispiel oder Merksatz"
+            placeholder="Name, Prüfpunkt, Schritt oder Beispiel"
           />
         </label>
         <div className="category-filters" aria-label="Kategorien">
@@ -73,6 +78,7 @@ export function LibraryView() {
       <div className="library-grid">
         {filteredThreads.map((thread, index) => {
           const expanded = expandedId === thread.id
+          const guide = getAnswerGuide(thread.id)
           return (
             <article className={expanded ? 'thread-card expanded' : 'thread-card'} key={thread.id}>
               <button className="thread-card-header" type="button" onClick={() => setExpandedId(expanded ? null : thread.id)}>
@@ -80,20 +86,42 @@ export function LibraryView() {
                 <span className="thread-heading">
                   <small>{thread.category}</small>
                   <strong>{thread.name}</strong>
-                  <span>{thread.mnemonic}</span>
+                  <span>{guide.conversationSteps.join(' → ')}</span>
                 </span>
                 <span className="expand-symbol" aria-hidden="true">{expanded ? '−' : '+'}</span>
               </button>
 
               {expanded && (
-                <div className="thread-card-body">
+                <div className="thread-card-body final-thread-body">
                   <div className="thread-purpose">
                     <span>Ziel</span>
                     <strong>{thread.purpose}</strong>
                   </div>
-                  <ol>
-                    {thread.steps.map((step) => <li key={step}>{step}</li>)}
-                  </ol>
+
+                  <section className="library-checkpoint">
+                    <span>Entscheidender Prüfpunkt</span>
+                    <strong>{guide.checkpoint}</strong>
+                  </section>
+
+                  <section className="library-conversation-path">
+                    <span>Gesprächsschritte</span>
+                    <ol>
+                      {guide.conversationSteps.map((step) => <li key={step}>{step}</li>)}
+                    </ol>
+                  </section>
+
+                  <section className="library-detailed-path">
+                    <span>Ausführliche Denkstruktur</span>
+                    <ol>
+                      {thread.steps.map((step) => <li key={step}>{step}</li>)}
+                    </ol>
+                  </section>
+
+                  <section className="example-list recognition-examples">
+                    <span>Typische Interviewfragen</span>
+                    {guide.recognitionExamples.map((example) => <p key={example}>„{example}“</p>)}
+                  </section>
+
                   {thread.variants && thread.variants.length > 0 && (
                     <div className="variant-list">
                       <span>Fachliche Varianten</span>
@@ -107,10 +135,6 @@ export function LibraryView() {
                       ))}
                     </div>
                   )}
-                  <div className="example-list">
-                    <span>Anonymisierte Beispiele</span>
-                    {thread.examples.map((example) => <p key={example}>„{example}“</p>)}
-                  </div>
                 </div>
               )}
             </article>

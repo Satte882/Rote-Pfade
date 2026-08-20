@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import '../management-training.css'
+import { getAnswerGuide } from '../data/answer-guides'
 import { threads } from '../lib/classifier'
 import {
   loadTrainingStats,
-  saveLeverTrainingAnswer,
   saveThreadTrainingAnswer,
 } from '../lib/storage'
 import { createTrainingQuestion } from '../lib/training'
@@ -24,7 +24,6 @@ export function TrainingView({ dataVersion }: { dataVersion: number }) {
   const [mode, setModeState] = useState<TrainingMode>(getInitialTrainingMode)
   const [question, setQuestion] = useState(() => createTrainingQuestion(threads))
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null)
-  const [selectedLeverId, setSelectedLeverId] = useState<string | null>(null)
   const [learningRevealed, setLearningRevealed] = useState(false)
   const [stats, setStats] = useState(() => loadTrainingStats())
 
@@ -33,11 +32,8 @@ export function TrainingView({ dataVersion }: { dataVersion: number }) {
   }, [dataVersion])
 
   const threadRevealed = selectedThreadId !== null
-  const leverRevealed = selectedLeverId !== null
   const isThreadCorrect = selectedThreadId === question.correctThread.id
-  const isLeverCorrect = selectedLeverId === question.correctLever.id
   const threadAccuracy = stats.answered === 0 ? 0 : Math.round((stats.correct / stats.answered) * 100)
-  const leverAccuracy = stats.leverAnswered === 0 ? 0 : Math.round((stats.leverCorrect / stats.leverAnswered) * 100)
   const resolvedName = question.correctVariant
     ? `${question.correctThread.name} · ${question.correctVariant.name}`
     : question.correctThread.name
@@ -46,6 +42,7 @@ export function TrainingView({ dataVersion }: { dataVersion: number }) {
   const resolvedDescription = question.correctVariant?.description ?? question.correctThread.description
   const resolvedMnemonic = question.correctVariant?.mnemonic ?? question.correctThread.mnemonic
   const resolvedOpening = question.correctVariant?.opening ?? question.correctThread.opening
+  const guide = getAnswerGuide(question.correctThread.id)
   const relatedThreads = question.correctThread.relatedIds
     .map((id) => threads.find((thread) => thread.id === id))
     .filter((thread): thread is (typeof threads)[number] => Boolean(thread))
@@ -63,16 +60,9 @@ export function TrainingView({ dataVersion }: { dataVersion: number }) {
     setStats(saveThreadTrainingAnswer(question.correctThread.id, threadId === question.correctThread.id))
   }
 
-  const selectLever = (leverId: string) => {
-    if (!threadRevealed || leverRevealed) return
-    setSelectedLeverId(leverId)
-    setStats(saveLeverTrainingAnswer(question.correctLever.id, leverId === question.correctLever.id))
-  }
-
   const nextQuestion = () => {
     setQuestion(createTrainingQuestion(threads, question.prompt))
     setSelectedThreadId(null)
-    setSelectedLeverId(null)
     setLearningRevealed(false)
   }
 
@@ -82,18 +72,17 @@ export function TrainingView({ dataVersion }: { dataVersion: number }) {
         <div>
           <p className="eyebrow">Management-Training</p>
           <h1 id="training-title">
-            {mode === 'practice' ? 'Fragetyp und Management-Hebel erkennen' : 'Antwortlogik verstehen und verankern'}
+            {mode === 'practice' ? 'Fragetyp, Prüfpunkt und Schritte abrufen' : 'Antwortlogik verstehen und verankern'}
           </h1>
           <p>
             {mode === 'practice'
-              ? 'Kompakt abrufen: erst den roten Faden, danach den entscheidenden Management-Hebel bestimmen.'
-              : 'Ausführlich lernen: roten Pfad, Denkstruktur und Management-Hebel an einer konkreten Interviewfrage nachvollziehen.'}
+              ? 'Erst den roten Pfad erkennen. Danach Prüfpunkt und Gesprächsschritte als lineare Antwortlogik abrufen.'
+              : 'Verstehen, wie roter Pfad, entscheidender Prüfpunkt und Management-Hintergrund zusammenwirken.'}
           </p>
         </div>
         {mode === 'practice' && (
           <div className="training-stats" aria-label="Trainingsstatistik">
             <div><span>Fragetyp</span><strong>{threadAccuracy}%</strong></div>
-            <div><span>Hebel</span><strong>{leverAccuracy}%</strong></div>
           </div>
         )}
       </div>
@@ -145,41 +134,42 @@ export function TrainingView({ dataVersion }: { dataVersion: number }) {
           </div>
 
           {threadRevealed && (
-            <>
-              <div className={`management-check ${isThreadCorrect ? 'correct-check' : 'wrong-check'}`} aria-live="polite">
+            <div className="practice-answer-guide" aria-live="polite">
+              <div className={`management-check ${isThreadCorrect ? 'correct-check' : 'wrong-check'}`}>
                 <strong>{isThreadCorrect ? `Fragetyp richtig: ${resolvedName}.` : `Passender Fragetyp: ${resolvedName}.`}</strong>
               </div>
 
-              <div className="management-training-stage">
-                <span className="management-stage-label">2. Management-Hebel</span>
-                <p className="management-stage-prompt">Was ist in dieser konkreten Frage der entscheidende Hebel?</p>
-                <div className="training-options management-lever-options">
-                  {question.leverOptions.map((lever) => {
-                    const selected = selectedLeverId === lever.id
-                    const correct = leverRevealed && lever.id === question.correctLever.id
-                    const wrong = leverRevealed && selected && !correct
-                    const classes = ['training-option', selected ? 'selected' : '', correct ? 'correct' : '', wrong ? 'wrong' : '']
-                      .filter(Boolean)
-                      .join(' ')
-                    return (
-                      <button className={classes} type="button" key={lever.id} onClick={() => selectLever(lever.id)} disabled={leverRevealed}>
-                        <strong>{lever.name}</strong>
-                        <span>{lever.principle}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            </>
-          )}
+              <section className="practice-checkpoint">
+                <span className="management-stage-label">2. Entscheidender Prüfpunkt</span>
+                <strong>{guide.checkpoint}</strong>
+              </section>
 
-          {leverRevealed && (
-            <div className={`training-feedback ${isLeverCorrect ? 'correct-feedback' : 'wrong-feedback'}`} aria-live="polite">
-              <strong>{isLeverCorrect ? `Hebel richtig: ${question.correctLever.name}.` : `Passender Hebel: ${question.correctLever.name}.`}</strong>
-              <p><strong>Prinzip:</strong> {question.correctLever.principle}</p>
-              <p>{question.rationale}</p>
-              <div className="management-lever-description">{question.correctLever.description}</div>
-              <div className="mini-thread"><strong>Roter Pfad:</strong> {resolvedSteps.join(' → ')}</div>
+              <section className="practice-conversation-steps">
+                <span className="management-stage-label">3. Schritte</span>
+                <ol className="conversation-path">
+                  {guide.conversationSteps.map((step, index) => (
+                    <li key={step}>
+                      <span aria-hidden="true">{index + 1}</span>
+                      <strong>{step}</strong>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+
+              <div className="spoken-schema-strip">
+                <span>Sprechen</span>
+                <strong>Position → Begründung / Trade-off → Konsequenz → STOP</strong>
+              </div>
+
+              <details className="management-background">
+                <summary>Fachlicher Management-Hintergrund</summary>
+                <div>
+                  <strong>{question.correctLever.name}: {question.correctLever.principle}</strong>
+                  <p>{question.rationale}</p>
+                  <p>{question.correctLever.description}</p>
+                </div>
+              </details>
+
               <button className="button button-primary" type="button" onClick={nextQuestion}>Nächste Frage</button>
             </div>
           )}
@@ -191,7 +181,7 @@ export function TrainingView({ dataVersion }: { dataVersion: number }) {
 
           {!learningRevealed ? (
             <div className="learning-start">
-              <p>Formuliere gedanklich zuerst: Welcher rote Pfad hilft mir – und was ist hier der entscheidende Management-Hebel?</p>
+              <p>Formuliere gedanklich zuerst: Welcher rote Pfad hilft mir – und was muss ich innerhalb dieses Pfades prüfen?</p>
               <button className="button button-primary" type="button" onClick={() => setLearningRevealed(true)}>
                 Lösung anzeigen
               </button>
@@ -206,21 +196,31 @@ export function TrainingView({ dataVersion }: { dataVersion: number }) {
                   <div className="learning-principle"><strong>Zweck:</strong> {question.correctThread.purpose}</div>
                 </section>
 
-                <section className="learning-anchor">
-                  <span className="learning-kicker">2. Management-Hebel</span>
-                  <h3>{question.correctLever.name}</h3>
-                  <p>{question.correctLever.description}</p>
-                  <div className="learning-principle"><strong>Prinzip:</strong> {question.correctLever.principle}</div>
+                <section className="learning-anchor checkpoint-anchor">
+                  <span className="learning-kicker">2. Entscheidender Prüfpunkt</span>
+                  <h3>{guide.checkpoint}</h3>
+                  <p>Der Prüfpunkt ist kein eigener Antwortblock. Er bestimmt, worauf du innerhalb der Schritte fokussierst.</p>
                 </section>
               </div>
 
               <section className="learning-section">
-                <span className="learning-kicker">Warum passt das?</span>
-                <p>{question.rationale}</p>
+                <span className="learning-kicker">3. Gesprächsschritte</span>
+                <ol className="conversation-path learning-conversation-path">
+                  {guide.conversationSteps.map((step, index) => (
+                    <li key={step}>
+                      <span aria-hidden="true">{index + 1}</span>
+                      <strong>{step}</strong>
+                    </li>
+                  ))}
+                </ol>
+                <div className="spoken-schema-strip">
+                  <span>Sprechen</span>
+                  <strong>Position → Begründung / Trade-off → Konsequenz → STOP</strong>
+                </div>
               </section>
 
               <section className="learning-section">
-                <span className="learning-kicker">Denkstruktur</span>
+                <span className="learning-kicker">Ausführliche Denkstruktur</span>
                 <ol className="learning-steps">
                   {resolvedSteps.map((step, index) => (
                     <li key={step}>
@@ -232,6 +232,18 @@ export function TrainingView({ dataVersion }: { dataVersion: number }) {
                     </li>
                   ))}
                 </ol>
+              </section>
+
+              <section className="learning-section">
+                <span className="learning-kicker">Warum passt das?</span>
+                <p>{question.rationale}</p>
+              </section>
+
+              <section className="learning-section management-background-card">
+                <span className="learning-kicker">Fachlicher Management-Hintergrund</span>
+                <h3>{question.correctLever.name}</h3>
+                <p>{question.correctLever.description}</p>
+                <div className="learning-principle"><strong>Prinzip:</strong> {question.correctLever.principle}</div>
               </section>
 
               <section className="learning-section learning-position">
