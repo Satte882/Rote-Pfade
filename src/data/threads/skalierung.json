@@ -22,6 +22,10 @@
   "mnemonic": "Erst Gate, dann Produktreife, dann Rollout",
   "cues": [
     { "text": "skalieren", "weight": 7 },
+    { "text": "ausweitung", "weight": 8 },
+    { "text": "ausweiten", "weight": 7 },
+    { "text": "pilotnutzer", "weight": 6 },
+    { "text": "nutzerzahl", "weight": 4 },
     { "text": "scale up", "weight": 7 },
     { "text": "erfolgreichen piloten", "weight": 4 },
     { "text": "in die organisation", "weight": 5 },
