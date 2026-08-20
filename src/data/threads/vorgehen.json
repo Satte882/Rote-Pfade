@@ -75,7 +75,12 @@
         { "text": "prozessaufnahme", "weight": 7 },
         { "text": "value stream analysieren", "weight": 7 }
       ],
-      "antiCues": [],
+      "antiCues": [
+        { "text": "ausweitung", "weight": 5 },
+        { "text": "skalieren", "weight": 5 },
+        { "text": "rollout", "weight": 5 },
+        { "text": "pilotnutzer", "weight": 4 }
+      ],
       "examples": [
         "Wie führen Sie eine strukturierte Prozessanalyse durch?",
         "Wie untersuchen Sie den Ist-Prozess und leiten Verbesserungen ab?",
